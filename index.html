@@ -1430,6 +1430,7 @@
             <div style="position: sticky; top: 0; z-index: 100; background: white; padding: 1rem 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; padding-left: 1rem; padding-right: 1rem;">
                     <button class="btn-secondary" onclick="importProject()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Import Project</button>
+                    <button class="btn-secondary" onclick="pullAssignedProjects().then(count => customAlert(count + ' new assigned project(s) pulled.')).catch(e => customAlert('Could not reach the backend: ' + e.message))" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Pull Assigned Projects</button>
                     <div style="flex: 1;"></div>
                     <button class="btn-secondary" onclick="createProjectFolder()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg> New Folder</button>
                     <button class="btn-primary" onclick="showNewProjectForm()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; border: 2px solid #d9dae2;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create New Project</button>
@@ -4016,6 +4017,236 @@
             }
         };
 
+        // =====================================================================
+        // New backend sync (media-planner-sandbox) — background mirror only.
+        // §8 Phase B (confirmed 2026-09-01): loadProjects()/saveProjects()
+        // stay exactly as they are — this doesn't replace localStorage, it
+        // mirrors data to the new Sheets/Apps Script backend afterward,
+        // modeled directly on the existing syncDealToSupabase() pattern
+        // above (fire-and-forget after the local save, pending-retry queue
+        // for failures). Projects are never created here — only Assignment
+        // creates them (confirmed 2026-09-01) — so project sync is always
+        // an update, never a create.
+        // =====================================================================
+        const SANDBOX_API_URL = 'https://script.google.com/macros/s/AKfycbxSFOffhttkk_81Y-ivuSOcPFWhlTwfNaOzW3Zw5toMnKRreZ4UYVaAkUfiemwltvfx/exec';
+
+        function backendJsonpRequest(params) {
+            return new Promise((resolve, reject) => {
+                const callbackName = '__backendCallback_' + Math.random().toString(36).slice(2);
+                const script = document.createElement('script');
+                const timer = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('Backend request timed out'));
+                }, 15000);
+                function cleanup() {
+                    delete window[callbackName];
+                    script.remove();
+                    clearTimeout(timer);
+                }
+                window[callbackName] = (data) => { cleanup(); resolve(data); };
+                script.onerror = () => { cleanup(); reject(new Error('Backend request failed to load')); };
+                const query = new URLSearchParams(Object.assign({}, params, { callback: callbackName }));
+                script.src = SANDBOX_API_URL + '?' + query.toString();
+                document.body.appendChild(script);
+            });
+        }
+
+        function backendPost(params) {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                const iframeName = '__backendWriteFrame_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+                iframe.name = iframeName;
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = SANDBOX_API_URL;
+                form.target = iframeName;
+                Object.entries(params).forEach(([key, value]) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                });
+                document.body.appendChild(iframe);
+                document.body.appendChild(form);
+                form.submit();
+                setTimeout(() => { form.remove(); iframe.remove(); resolve(); }, 1500);
+            });
+        }
+
+        function getPendingBackendSyncs() {
+            try { return JSON.parse(localStorage.getItem('mediaPlanner_pendingBackendSyncs') || '[]'); }
+            catch (e) { return []; }
+        }
+        function setPendingBackendSyncs(projectIds) {
+            localStorage.setItem('mediaPlanner_pendingBackendSyncs', JSON.stringify(projectIds));
+        }
+        function markProjectPendingBackendSync(projectId) {
+            const pending = getPendingBackendSyncs();
+            if (!pending.includes(projectId)) {
+                pending.push(projectId);
+                setPendingBackendSyncs(pending);
+            }
+        }
+        function clearProjectPendingBackendSync(projectId) {
+            setPendingBackendSyncs(getPendingBackendSyncs().filter(id => id !== projectId));
+        }
+
+        // Backend TentpoleShows live in a separate sheet from this browser's
+        // local `tentpoleShows` list — same reasoning as the existing
+        // Supabase sync's tentpoleShowName passthrough (a local show ID from
+        // one browser can't mean anything to the backend or another
+        // browser). Resolve by NAME, creating a backend entry if needed.
+        let backendTentpoleShowsCache = null;
+        async function resolveBackendTentpoleShowId(localShowId) {
+            if (!localShowId) return null;
+            const localName = getTentpoleShowName(localShowId);
+            if (!localName) return null;
+            if (!backendTentpoleShowsCache) {
+                backendTentpoleShowsCache = await backendJsonpRequest({ action: 'listTentpoleShows' }).catch(() => []);
+            }
+            const existing = backendTentpoleShowsCache.find(s => s.name === localName);
+            if (existing) return existing.id;
+            const id = 'show-' + Date.now();
+            await backendPost({ action: 'createTentpoleShow', payload: JSON.stringify({ id, name: localName }) });
+            backendTentpoleShowsCache.push({ id, name: localName });
+            return id;
+        }
+
+        // Only the fields the Planner tool actually owns get sent — omitting
+        // everything else means an update never clobbers Assignment-owned
+        // fields (pitchTeam, holdCo, mediaPlanStatus, project-level
+        // dealStatus, etc.) that this tool doesn't know about.
+        async function mapProjectToBackendPayload(project) {
+            const payload = { id: project.id };
+            if (project.projectName) payload.projectName = project.projectName;
+            if (project.brandName) payload.account = project.brandName;
+            if (project.subBrandName) payload.brand = project.subBrandName;
+            if (project.agencyName) payload.agency = project.agencyName;
+            if (project.campaignStartDate) payload.campaignStartDate = project.campaignStartDate;
+            if (project.campaignEndDate) payload.campaignEndDate = project.campaignEndDate;
+            if (project.salesforceLink) payload.salesforceLink = project.salesforceLink;
+            if (project.budgetSheetLink) payload.budgetSheetLink = project.budgetSheetLink;
+            if (project.dealCategory) payload.dealCategory = project.dealCategory;
+            if (project.plannerEmail) payload.leadMediaPlannerEmail = project.plannerEmail;
+            if (project.tentpoleShowId) {
+                payload.tentpoleShowId = await resolveBackendTentpoleShowId(project.tentpoleShowId);
+            }
+            return payload;
+        }
+
+        function mapVersionToBackendPayload(project, version) {
+            const overall = calculateOverallTotals(version.packages || []);
+            return {
+                id: version.id,
+                projectId: project.id,
+                name: version.name || '',
+                totalInvestment: overall.totalPrice || 0,
+                versionStatus: version.dealStatus || null,
+            };
+        }
+
+        function getSyncedBackendVersionIds() {
+            try { return JSON.parse(localStorage.getItem('mediaPlanner_backendSyncedVersionIds') || '[]'); }
+            catch (e) { return []; }
+        }
+        function markVersionSyncedToBackend(versionId) {
+            const synced = getSyncedBackendVersionIds();
+            if (!synced.includes(versionId)) {
+                synced.push(versionId);
+                localStorage.setItem('mediaPlanner_backendSyncedVersionIds', JSON.stringify(synced));
+            }
+        }
+
+        // Pushes one project (update only, never create — Assignment owns
+        // creation) and all its versions (create-or-update) to the backend.
+        // Never blocks the caller; local save has already happened.
+        async function syncProjectToBackend(project) {
+            if (!project || !project.id) return false;
+            try {
+                const projectPayload = await mapProjectToBackendPayload(project);
+                await backendPost({ action: 'updateProject', payload: JSON.stringify(projectPayload) });
+
+                const syncedVersionIds = getSyncedBackendVersionIds();
+                for (const version of (project.versions || [])) {
+                    const versionPayload = mapVersionToBackendPayload(project, version);
+                    const action = syncedVersionIds.includes(version.id) ? 'updateVersion' : 'createVersion';
+                    await backendPost({ action, payload: JSON.stringify(versionPayload) });
+                    markVersionSyncedToBackend(version.id);
+                }
+                clearProjectPendingBackendSync(project.id);
+                return true;
+            } catch (e) {
+                console.error('Backend sync failed, queued for retry:', e);
+                markProjectPendingBackendSync(project.id);
+                return false;
+            }
+        }
+
+        // Debounced — saveProjects() can fire many times per minute while a
+        // planner is actively editing; this waits for a short pause before
+        // actually pushing, rather than syncing on every keystroke-driven autosave.
+        let backendSyncTimer = null;
+        function scheduleBackendSync(project) {
+            if (!project) return;
+            clearTimeout(backendSyncTimer);
+            backendSyncTimer = setTimeout(() => { syncProjectToBackend(project); }, 4000);
+        }
+
+        async function retryPendingBackendSyncs() {
+            const pending = getPendingBackendSyncs();
+            if (pending.length === 0) return;
+            for (const projectId of pending) {
+                const project = projects.find(p => p.id === projectId);
+                if (project) await syncProjectToBackend(project);
+            }
+        }
+
+        // Pulls Assignment-created projects this browser doesn't have yet.
+        // Never overwrites an already-known local project — Assignment-owned
+        // fields (pitchTeam, holdCo, mediaPlanStatus, etc.) aren't pulled
+        // down into the local shape at all; they're not this tool's concern.
+        async function pullAssignedProjects() {
+            let backendProjects;
+            try {
+                backendProjects = await backendJsonpRequest({ action: 'listProjects' });
+            } catch (e) {
+                console.error('Could not pull assigned projects:', e);
+                return 0;
+            }
+            const localIds = new Set(projects.map(p => p.id));
+            let pulledCount = 0;
+            for (const bp of backendProjects) {
+                if (localIds.has(bp.id)) continue;
+                projects.push({
+                    id: bp.id,
+                    projectName: bp.projectName || '',
+                    brandName: bp.account || '',
+                    subBrandName: bp.brand || '',
+                    agencyName: bp.agency || '',
+                    campaignStartDate: bp.campaignStartDate || '',
+                    campaignEndDate: bp.campaignEndDate || '',
+                    salesforceLink: bp.salesforceLink || '',
+                    budgetSheetLink: bp.budgetSheetLink || '',
+                    mediaPlanLink: '',
+                    plannerName: '',
+                    plannerEmail: bp.leadMediaPlannerEmail || '',
+                    versions: [],
+                    createdAt: bp.createdAt || new Date().toISOString(),
+                    folders: [],
+                    dealCategory: bp.dealCategory || null,
+                    tentpoleShowId: null, // resolved lazily on next sync, not on pull
+                });
+                pulledCount++;
+            }
+            if (pulledCount > 0) {
+                saveProjects();
+                displayProjects();
+            }
+            return pulledCount;
+        }
+
         // Initialize
         window.onload = function() {
             loadProjects();
@@ -4024,6 +4255,8 @@
             initializeInputFormatting();
             updateSupabaseSyncIndicator();
             retryPendingSupabaseSyncs(); // pick up anything left unsynced from a previous session
+            retryPendingBackendSyncs(); // pick up anything left unsynced from a previous session
+            pullAssignedProjects(); // fire and forget — pick up new Assignment-created projects
             
             // Add warning when closing browser with unsaved changes
             window.addEventListener('beforeunload', function(e) {
@@ -4396,8 +4629,16 @@
                 
                 // Save new data
                 localStorage.setItem('mediaPlanner_projects', dataStr);
+
+                // Background mirror to the new backend — never blocks this
+                // save, matches the existing Supabase sync's fire-and-forget
+                // shape (see "New backend sync" block above).
+                if (typeof currentProject !== 'undefined' && currentProject && currentProject.id) {
+                    scheduleBackendSync(currentProject);
+                }
+
                 return true;
-                
+
             } catch (error) {
                 console.error("Error saving projects:", error);
                 if (error.name === 'QuotaExceededError') {
