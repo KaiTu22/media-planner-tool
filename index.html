@@ -4149,6 +4149,13 @@
                 name: version.name || '',
                 totalInvestment: overall.totalPrice || 0,
                 versionStatus: version.dealStatus || null,
+                // Raw array, not pre-stringified — the outer JSON.stringify()
+                // in syncProjectToBackend() serializes this correctly as part
+                // of the whole payload; the backend's appendRecord_/updateRecord_
+                // already special-case 'packages' to re-flatten it for the
+                // sheet cell (same handling as the closed_deals pilot's
+                // 'snapshot' field).
+                packages: version.packages || [],
             };
         }
 
