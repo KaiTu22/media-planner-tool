@@ -4145,6 +4145,7 @@
                 id: version.id,
                 projectId: project.id,
                 name: version.name || '',
+                completedDate: version.completedDate || null,
                 totalInvestment: overall.totalPrice || 0,
                 versionStatus: version.dealStatus || null,
                 // Raw array, not pre-stringified — the outer JSON.stringify()
@@ -5210,7 +5211,7 @@
                 <div class="package-card">
                     <div class="package-header">
                         <div style="flex:1;">
-                            <div class="package-title">${version.name || 'Version ' + (index + 1)}${dealStatusBadgeHTML(version)}</div>
+                            <div class="package-title">${version.name || 'Version ' + (index + 1)}${dealStatusBadgeHTML(version)}${completedBadgeHTML(version)}</div>
                             <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.25rem;">
                                 ${version.packages.length} package${version.packages.length!==1?'s':''} •
                                 Created ${new Date(version.createdAt).toLocaleDateString()} at ${new Date(version.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
@@ -5243,6 +5244,7 @@
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
                         <div style="display:flex;gap:0.5rem;">
                             ${dealStatusActionsHTML(version, index)}
+                            ${completedActionHTML(version, index)}
                         </div>
                         <button class="btn-primary btn-sm" onclick="selectVersion(${index});" style="display:inline-flex;align-items:center;gap:0.35rem;">View <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
                     </div>
@@ -6060,6 +6062,46 @@
                 }
             }
             return `<span${title} style="display:inline-flex;align-items:center;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:12px;background:${b.bg};color:${b.color};border:1px solid ${b.border};margin-left:0.5rem;">${b.text}</span>`;
+        }
+
+        // §6.2 step 3 — a new, explicit action, deliberately independent of
+        // dealStatus (a version can be "Complete" as a finished piece of
+        // work regardless of whether it ever gets marked Verbal/Closed as a
+        // deal). Stamps completedDate, which is what makes a version show up
+        // in the Plans Log — completedDate is synced to the backend via the
+        // existing debounced background sync, no separate call needed here.
+        function completedBadgeHTML(version) {
+            if (!version.completedDate) return '';
+            const title = ` title="Completed ${new Date(version.completedDate).toLocaleString()}"`;
+            return `<span${title} style="display:inline-flex;align-items:center;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:12px;background:#E0F2FE;color:#075985;border:1px solid #38BDF8;margin-left:0.5rem;">✓ Complete</span>`;
+        }
+
+        function completedActionHTML(version, versionIndex) {
+            if (version.completedDate) {
+                return `<button class="btn-secondary btn-sm" onclick="unmarkVersionComplete(${versionIndex});">Remove Complete Status</button>`;
+            }
+            return `<button class="btn-secondary btn-sm" onclick="markVersionComplete(${versionIndex});">✓ Mark Complete</button>`;
+        }
+
+        function markVersionComplete(versionIndex) {
+            const version = currentProject.versions[versionIndex];
+            showConfirm(
+                `Mark "${version.name || 'this version'}" as Complete? This records it as a finished plan in the Plans Log — independent of its deal status (Verbal/Closed), since not every completed plan ends up winning the deal.`,
+                () => {
+                    version.completedDate = new Date().toISOString();
+                    saveProjects();
+                    displayVersions();
+                },
+                'Mark Complete',
+                'btn-primary'
+            );
+        }
+
+        function unmarkVersionComplete(versionIndex) {
+            const version = currentProject.versions[versionIndex];
+            version.completedDate = null;
+            saveProjects();
+            displayVersions();
         }
 
         function dealStatusActionsHTML(version, versionIndex) {
