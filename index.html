@@ -1682,6 +1682,21 @@
                     </div>
                 </div>
 
+                <!-- Project Files (confirmed 2026-09-04) — upload any supporting
+                     document straight into this project's Drive folder without
+                     leaving the app. -->
+                <div style="margin-bottom: 1.25rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+                        <strong style="font-size: 0.85rem;">Project Files</strong>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="file" id="projectFileInput" style="font-size: 0.8rem;">
+                            <button class="btn-secondary btn-sm" onclick="uploadProjectFileAttachment()">Upload</button>
+                        </div>
+                    </div>
+                    <div id="projectFileUploadStatus" style="font-size: 0.8rem; margin-top: 0.4rem;"></div>
+                    <ul id="projectFileList" style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.85rem;"></ul>
+                </div>
+
                 <div style="margin-bottom: 0.75rem;">
                     <div style="position: relative;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); pointer-events: none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -4271,6 +4286,88 @@
             return pulledCount;
         }
 
+        // Project Files (confirmed 2026-09-04) — lets a planner attach any
+        // supporting document (signed IO, client PDF, screenshot, etc.)
+        // straight into the project's Drive folder from inside the app,
+        // instead of clicking through to Drive and finding the folder.
+        const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10MB — generous for typical office docs
+
+        async function loadProjectFileList() {
+            const listEl = document.getElementById('projectFileList');
+            if (!currentProject || !listEl) return;
+            listEl.innerHTML = '<li>Loading…</li>';
+            try {
+                const files = await backendJsonpRequest({ action: 'listProjectFiles', projectId: currentProject.id });
+                listEl.innerHTML = files.length === 0
+                    ? '<li style="color: var(--text-muted); list-style: none; margin-left: -1.1rem;">No files uploaded yet.</li>'
+                    : files.map(f => `<li><a href="${f.url}" target="_blank" rel="noreferrer">${escapeHtml(f.name)}</a></li>`).join('');
+            } catch (e) {
+                listEl.innerHTML = '<li style="color: crimson; list-style: none; margin-left: -1.1rem;">Could not load files.</li>';
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function uploadProjectFileAttachment() {
+            const input = document.getElementById('projectFileInput');
+            const statusEl = document.getElementById('projectFileUploadStatus');
+            const file = input.files[0];
+            if (!file) {
+                statusEl.textContent = 'Choose a file first.';
+                statusEl.style.color = 'crimson';
+                return;
+            }
+            if (!currentProject.folderId) {
+                statusEl.textContent = 'This project has no Drive folder yet — cannot upload.';
+                statusEl.style.color = 'crimson';
+                return;
+            }
+            if (file.size > MAX_ATTACHMENT_BYTES) {
+                statusEl.textContent = `File is too large (max ${MAX_ATTACHMENT_BYTES / 1024 / 1024}MB) — upload it directly in Drive instead.`;
+                statusEl.style.color = 'crimson';
+                return;
+            }
+            statusEl.textContent = 'Uploading…';
+            statusEl.style.color = '';
+            try {
+                const contentBase64 = await fileToBase64(file);
+                await backendPost({
+                    action: 'uploadProjectAttachment',
+                    projectId: currentProject.id,
+                    filename: file.name,
+                    mimeType: file.type || 'application/octet-stream',
+                    contentBase64,
+                });
+                // Fire-and-forget write (same reasoning as verifyByPolling in the
+                // React app) — poll briefly rather than trusting it landed.
+                let found = false;
+                for (let i = 0; i < 8 && !found; i++) {
+                    await new Promise((r) => setTimeout(r, 800));
+                    const files = await backendJsonpRequest({ action: 'listProjectFiles', projectId: currentProject.id });
+                    found = files.some((f) => f.name === file.name);
+                }
+                if (found) {
+                    statusEl.textContent = 'Uploaded.';
+                    statusEl.style.color = 'green';
+                    input.value = '';
+                    loadProjectFileList();
+                } else {
+                    statusEl.textContent = 'Upload may have failed — check the Drive folder directly.';
+                    statusEl.style.color = 'crimson';
+                }
+            } catch (e) {
+                statusEl.textContent = 'Upload failed: ' + e.message;
+                statusEl.style.color = 'crimson';
+            }
+        }
+
         // Initialize
         window.onload = function() {
             loadProjects();
@@ -4937,6 +5034,7 @@
             currentProject = projects[index];
             displayVersions();
             showScreen('screen-0-75');
+            loadProjectFileList();
         }
 
         function backToProjects() {
