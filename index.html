@@ -1655,6 +1655,7 @@
                     <div>
                         <h2 id="versionProjectName" style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Project Name</h2>
                         <div id="projectInfoSummary" style="margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; font-size: 0.82rem; color: var(--text-muted);"></div>
+                        <div id="backendSyncStatus" style="margin-top: 0.3rem; font-size: 0.78rem; font-weight: 600;"></div>
                     </div>
                     <div style="display: flex; gap: 0.5rem; flex-shrink: 0; margin-top: 0.25rem;">
                         <button class="btn-secondary" onclick="editProjectInfo()" style="padding: 0.45rem 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"/></svg> Edit Project Info</button>
@@ -4202,11 +4203,35 @@
             }
         }
 
+        // Surfaces real sync state instead of leaving the user to guess
+        // whether a change has actually reached the backend — confirmed
+        // 2026-09-08 as a real gap: a version marked Complete looked saved
+        // locally, but the pending debounced sync was silently dropped when
+        // the user navigated away before it fired, several seconds later.
+        function setBackendSyncStatus(state) {
+            const el = document.getElementById('backendSyncStatus');
+            if (!el) return;
+            if (state === 'saving') {
+                el.textContent = 'Saving to cloud…';
+                el.style.color = '#92400E';
+            } else if (state === 'saved') {
+                el.textContent = 'Saved to cloud ✓';
+                el.style.color = '#166534';
+                setTimeout(() => { if (el.textContent === 'Saved to cloud ✓') el.textContent = ''; }, 3000);
+            } else if (state === 'error') {
+                el.textContent = 'Sync failed — will retry';
+                el.style.color = '#991B1B';
+            } else {
+                el.textContent = '';
+            }
+        }
+
         // Pushes one project (update only, never create — Assignment owns
         // creation) and all its versions (create-or-update) to the backend.
         // Never blocks the caller; local save has already happened.
         async function syncProjectToBackend(project) {
             if (!project || !project.id) return false;
+            setBackendSyncStatus('saving');
             try {
                 const projectPayload = await mapProjectToBackendPayload(project);
                 await backendPost({ action: 'updateProject', payload: JSON.stringify(projectPayload) });
@@ -4232,10 +4257,12 @@
                 });
 
                 clearProjectPendingBackendSync(project.id);
+                setBackendSyncStatus('saved');
                 return true;
             } catch (e) {
                 console.error('Backend sync failed, queued for retry:', e);
                 markProjectPendingBackendSync(project.id);
+                setBackendSyncStatus('error');
                 return false;
             }
         }
@@ -4248,6 +4275,16 @@
             if (!project) return;
             clearTimeout(backendSyncTimer);
             backendSyncTimer = setTimeout(() => { syncProjectToBackend(project); }, 4000);
+        }
+
+        // For deliberate, one-time actions (Mark Complete, deal-status
+        // changes) rather than continuous editing — no reason to debounce a
+        // button someone clicks once, and waiting risks the same silently-
+        // dropped-sync problem confirmed 2026-09-08 if the user navigates
+        // away before the debounce fires.
+        function flushBackendSync(project) {
+            clearTimeout(backendSyncTimer);
+            syncProjectToBackend(project);
         }
 
         async function retryPendingBackendSyncs() {
@@ -5710,6 +5747,7 @@
                     version.markedVerbalPendingAt = new Date().toISOString();
                     saveProjects();
                     displayVersions();
+                    flushBackendSync(project); // one-time action — sync now, don't wait on the debounce
 
                     const dealId = `${project.id}::${version.id}`;
                     const overall = calculateOverallTotals(version.packages || []);
@@ -5734,6 +5772,7 @@
                     version.markedClosedAt = new Date().toISOString();
                     saveProjects();
                     displayVersions();
+                    flushBackendSync(project); // one-time action — sync now, don't wait on the debounce
 
                     const dealId = `${project.id}::${version.id}`;
                     const overall = calculateOverallTotals(version.packages || []);
@@ -5765,6 +5804,7 @@
                     delete version.dealSnapshot;
                     saveProjects();
                     displayVersions();
+                    flushBackendSync(project); // one-time action — sync now, don't wait on the debounce
 
                     const dealId = `${project.id}::${version.id}`;
                     deleteDealFromSupabase(dealId).then(success => {
@@ -6151,6 +6191,7 @@
             verifyDealVersionIndex = null;
             saveProjects();
             displayVersions();
+            flushBackendSync(project); // one-time action — sync now, don't wait on the debounce
 
             // Local save is done — now sync to the shared table in the
             // background. Never blocks the UI; queued for retry if it fails.
@@ -6233,6 +6274,7 @@
                     version.completedDate = new Date().toISOString();
                     saveProjects();
                     displayVersions();
+                    flushBackendSync(currentProject); // one-time action — sync now, don't wait on the debounce
                 },
                 'Mark Complete',
                 'btn-primary'
@@ -6244,6 +6286,7 @@
             version.completedDate = null;
             saveProjects();
             displayVersions();
+            flushBackendSync(currentProject);
         }
 
         function dealStatusActionsHTML(version, versionIndex) {
