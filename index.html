@@ -4051,10 +4051,10 @@
 
         // Embedded mode (confirmed 2026-09-04/08) — when opened inside an
         // <iframe> from media-planner-app's /planner/:projectId route (not
-        // as a standalone bookmarked page), Browse is the only way to pick
-        // a project: screen-0 (this tool's own project list) and its header/
-        // tab chrome are hidden, and "Back to Projects" navigates the
-        // parent shell instead of showing screen-0.
+        // as a standalone bookmarked page), the Assignment Log is the only
+        // way to pick a project: screen-0 (this tool's own project list)
+        // and its header/tab chrome are hidden, and "Back to Projects"
+        // navigates the parent shell instead of showing screen-0.
         const urlParams = new URLSearchParams(window.location.search);
         const IS_EMBEDDED = urlParams.get('embedded') === '1';
         const DEEP_LINK_PROJECT_ID = urlParams.get('projectId');
@@ -4430,8 +4430,8 @@
             if (IS_EMBEDDED) applyEmbeddedMode();
             if (IS_EMBEDDED && DEEP_LINK_PROJECT_ID) {
                 // Skip screen-0 entirely — avoid a flash of the tool's own
-                // project list when Browse (in the parent shell) already
-                // told us exactly which project to open.
+                // project list when the Assignment Log (in the parent
+                // shell) already told us exactly which project to open.
             } else {
                 displayProjects();
                 showScreen('screen-0');
@@ -5118,7 +5118,7 @@
                 currentProject = null;
                 currentVersion = null;
                 if (IS_EMBEDDED) {
-                    window.parent.postMessage({ type: 'planner:back-to-browse' }, '*');
+                    window.parent.postMessage({ type: 'planner:back-to-log' }, '*');
                     return;
                 }
                 displayProjects();
