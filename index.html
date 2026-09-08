@@ -1397,7 +1397,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 </head>
 <body>
-    <div class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div id="appHeader" class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 1.5rem; margin-left: 1.5rem;">
             <div style="cursor: pointer;" onclick="navigateToProjectsHome()">
                 <div style="font-family: 'ParamountVistaSans', 'Fjalla One', sans-serif; font-size: 2rem; font-weight: 700; letter-spacing: 0.08em; color: #001d48; white-space: nowrap;">MEDIA PLANNER</div>
@@ -1414,7 +1414,7 @@
     </div>
 
     <!-- Main Tab Navigation -->
-    <div class="main-tabs">
+    <div id="mainTabs" class="main-tabs">
         <button class="tab active" onclick="switchTab('planner')">Media Planner</button>
         <button class="tab" onclick="switchTab('closeddeals')">Closed Deals</button>
         <button class="tab" onclick="switchTab('tools')">Tools</button>
@@ -4048,6 +4048,23 @@
         // hosted URL; local dev server for now (§8, weeks 9-11 nav linking).
         const ASSIGNMENT_LOG_APP_URL = 'http://localhost:5177/';
 
+        // Embedded mode (confirmed 2026-09-04/08) — when opened inside an
+        // <iframe> from media-planner-app's /planner/:projectId route (not
+        // as a standalone bookmarked page), Browse is the only way to pick
+        // a project: screen-0 (this tool's own project list) and its header/
+        // tab chrome are hidden, and "Back to Projects" navigates the
+        // parent shell instead of showing screen-0.
+        const urlParams = new URLSearchParams(window.location.search);
+        const IS_EMBEDDED = urlParams.get('embedded') === '1';
+        const DEEP_LINK_PROJECT_ID = urlParams.get('projectId');
+
+        function applyEmbeddedMode() {
+            const header = document.getElementById('appHeader');
+            const tabs = document.getElementById('mainTabs');
+            if (header) header.style.display = 'none';
+            if (tabs) tabs.style.display = 'none';
+        }
+
         function backendJsonpRequest(params) {
             return new Promise((resolve, reject) => {
                 const callbackName = '__backendCallback_' + Math.random().toString(36).slice(2);
@@ -4373,14 +4390,25 @@
         // Initialize
         window.onload = function() {
             loadProjects();
-            displayProjects();
-            showScreen('screen-0');
+            if (IS_EMBEDDED) applyEmbeddedMode();
+            if (IS_EMBEDDED && DEEP_LINK_PROJECT_ID) {
+                // Skip screen-0 entirely — avoid a flash of the tool's own
+                // project list when Browse (in the parent shell) already
+                // told us exactly which project to open.
+            } else {
+                displayProjects();
+                showScreen('screen-0');
+            }
             initializeInputFormatting();
             updateSupabaseSyncIndicator();
             retryPendingSupabaseSyncs(); // pick up anything left unsynced from a previous session
             retryPendingBackendSyncs(); // pick up anything left unsynced from a previous session
-            pullAssignedProjects(); // fire and forget — pick up new Assignment-created projects
-            
+            pullAssignedProjects().then(function () { // fire and forget — pick up new Assignment-created projects
+                if (IS_EMBEDDED && DEEP_LINK_PROJECT_ID) {
+                    selectProjectById(DEEP_LINK_PROJECT_ID);
+                }
+            });
+
             // Add warning when closing browser with unsaved changes
             window.addEventListener('beforeunload', function(e) {
                 if (hasUnsavedChanges) {
@@ -5039,7 +5067,27 @@
             loadProjectFileList();
         }
 
+        // Deep-link entry point (embedded mode) — reuses selectProject
+        // verbatim once the array index is resolved, so every other
+        // index-based function (moveProjectToFolder, renameProject, etc.)
+        // is untouched by this.
+        function selectProjectById(id) {
+            const index = projects.findIndex(p => p.id === id);
+            if (index !== -1) selectProject(index);
+        }
+
         function backToProjects() {
+            function goBack() {
+                currentProject = null;
+                currentVersion = null;
+                if (IS_EMBEDDED) {
+                    window.parent.postMessage({ type: 'planner:back-to-browse' }, '*');
+                    return;
+                }
+                displayProjects();
+                showScreen('screen-0');
+            }
+
             // Check for unsaved changes
             if (hasUnsavedChanges) {
                 showConfirm(
@@ -5048,21 +5096,15 @@
                         hasUnsavedChanges = false;
                         currentPackage = {};
                         platformAllocations = [];
-                        currentProject = null;
-                        currentVersion = null;
-                        displayProjects();
-                        showScreen('screen-0');
+                        goBack();
                     },
                     'Leave Anyway',
                     'btn-danger'
                 );
                 return;
             }
-            
-            currentProject = null;
-            currentVersion = null;
-            displayProjects();
-            showScreen('screen-0');
+
+            goBack();
         }
 
         // Edit project information
