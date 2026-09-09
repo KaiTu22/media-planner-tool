@@ -119,35 +119,49 @@
         }
 
         :root {
-            /* Paramount Skydance Brand Colors */
-            --primary: #000a3c;          /* Vista Navy - Primary dark */
+            /* "Warm Navy" (confirmed 2026-09-09) — same Paramount Skydance
+               brand core (Vista Navy + Peak Blue, unchanged) as the new
+               media-planner-app shell, but the supporting palette warmed
+               and softened to match rather than the original cool, high-
+               saturation set. Variable *names* are untouched so every
+               existing rule that references them just inherits the new
+               values — see App.jsx's shell for the reference values. */
+            --primary: #000a3c;          /* Vista Navy - Primary dark (unchanged, brand core) */
             --primary-light: #1a2550;    /* Lightened Vista Navy */
-            --secondary: #475569;        /* Keep for subtle elements */
-            --accent: #0064ff;           /* Peak Blue - THE Paramount blue */
-            --accent-hover: #0052cc;     /* Darker Peak Blue for hover */
-            --success: #03d1e5;          /* Sky - High margins, success */
-            --success-dark: #059669;     /* Darker green for text */
-            --warning: #ffd400;          /* Sunrise - Low margin warnings */
-            --warning-dark: #d97706;     /* Darker orange for text */
-            --danger: #ff008a;           /* Horizon - Errors, critical */
-            --danger-dark: #dc2626;      /* Darker red for text */
-            --background: #f8fafc;       /* Lighter, cooler background */
-            --background-subtle: #f8fafc;/* Very subtle gray */
-            --surface: #ffffff;          /* Snowcap White */
-            --border: #e2e8f0;           /* Lighter border */
-            --border-light: rgba(0, 0, 0, 0.06); /* Very subtle border */
-            --text: #000a3c;             /* Vista Navy */
-            --text-primary: #0f172a;     /* Almost black - KEY NUMBERS */
-            --text-secondary: #1e293b;   /* Dark gray - HEADERS */
-            --text-body: #334155;        /* Medium dark - LABELS */
-            --text-muted: #64748B;       /* Gray - META INFO */
-            --text-subtle: #94a3b8;      /* Light gray - HINTS */
-            --gray-light: #f1f5f9;       /* Light gray for backgrounds */
+            --secondary: #57503F;        /* was cool slate #475569 */
+            --accent: #0064ff;           /* Peak Blue - THE Paramount blue (unchanged, matches new shell exactly) */
+            --accent-hover: #0052cc;     /* unchanged, matches new shell exactly */
+            --success: #0E9F8E;          /* was bright cyan "Sky" #03d1e5 */
+            --success-dark: #0B8577;     /* was #059669 */
+            --warning: #C98A2C;          /* was bright yellow "Sunrise" #ffd400 */
+            --warning-dark: #A66F1F;     /* was #d97706 */
+            --danger: #C24463;           /* was hot pink "Horizon" #ff008a */
+            --danger-dark: #9A3350;      /* was #dc2626 */
+            --background: #FAF6F0;       /* was cool slate #f8fafc */
+            --background-subtle: #FFFCF8;/* was #f8fafc */
+            --surface: #ffffff;          /* Snowcap White (unchanged) */
+            --border: #EAE2D6;           /* was cool #e2e8f0 */
+            --border-light: rgba(43, 38, 32, 0.06); /* was rgba(0,0,0,0.06) */
+            --text: #2B2620;             /* was Vista Navy #000a3c — body copy now warm charcoal, not brand-navy */
+            --text-primary: #2B2620;     /* was cool near-black #0f172a */
+            --text-secondary: #57503F;   /* was cool #1e293b */
+            --text-body: #443E32;        /* was cool #334155 */
+            --text-muted: #8A8271;       /* was cool #64748B */
+            --text-subtle: #A69C89;      /* was cool #94a3b8 */
+            --gray-light: #F1EAE0;       /* was cool #f1f5f9 */
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--background);
+            background-color: var(--background);
+            /* Same soft ambient warm glow + subtle grain as the new
+               media-planner-app shell (confirmed 2026-09-09), for a
+               cohesive feel across the embedded iframe boundary. */
+            background-image:
+                radial-gradient(ellipse 900px 500px at 15% 0%, rgba(0, 100, 255, 0.05), transparent 60%),
+                radial-gradient(ellipse 700px 500px at 100% 20%, rgba(201, 138, 44, 0.06), transparent 55%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            background-attachment: fixed;
             color: var(--text);
             line-height: 1.5;  /* Tighter */
             font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
@@ -156,15 +170,20 @@
         }
 
         .app-header {
-            background: linear-gradient(to right, #ffffff 50%, #000a3c 100%);
+            /* Calm flat bar (confirmed 2026-09-09), replacing the original
+               diagonal navy/white gradient + thick top/bottom rules to
+               match the new media-planner-app shell header — no content
+               here relied on the navy half's white-on-navy contrast, it
+               was purely decorative. Height reduced from 170px to match
+               the new shell's much shorter, denser header. */
+            background: var(--surface);
             color: var(--text);
             padding: 0 2rem 0 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-            height: 170px;
+            box-shadow: 0 2px 10px rgba(43, 38, 32, 0.05);
+            height: 84px;
             display: flex;
             align-items: center;
-            border-top: 3px solid #000a3c;
-            border-bottom: 3px solid #000a3c;
+            border-bottom: 1px solid var(--border);
         }
 
         .app-header h1 {
@@ -230,16 +249,22 @@
         }
 
         .card {
-            background: var(--surface);
-            border-radius: 12px;
+            /* Softer, deeper card treatment (confirmed 2026-09-09) matching
+               the new media-planner-app shell — larger radius, layered
+               shadow with a subtle top highlight instead of a flat
+               double-shadow, warm-tinted rather than pure black. */
+            background: linear-gradient(180deg, #FFFFFF 0%, var(--background-subtle) 100%);
+            border-radius: 18px;
             padding: 1rem 1.25rem;
-            box-shadow: 
-                0 2px 4px rgba(0, 0, 0, 0.06),
-                0 4px 8px rgba(0, 0, 0, 0.04);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.9) inset,
+                0 1px 3px rgba(43, 38, 32, 0.06),
+                0 4px 10px rgba(43, 38, 32, 0.05),
+                0 16px 40px rgba(43, 38, 32, 0.09);
             border: 1px solid var(--border-light);
             transition: all 0.2s ease;
         }
-        
+
         .card:hover {
             border-color: rgba(0, 100, 255, 0.2);
             box-shadow: 
@@ -255,13 +280,14 @@
         }
 
         .card-header h2 {
+            /* Dropped forced all-caps (confirmed 2026-09-09) — reserved for
+               the top-level wordmark only now, matching the new shell;
+               all-caps on every card title read as institutional/cold. */
             font-family: 'PeakSans', sans-serif;
-            text-transform: uppercase;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.25rem;
             font-size: 1.1rem;  /* Ultra-compact */
             color: var(--primary);
-            font-weight: 400;
-            margin-bottom: 0.25rem;  /* Reduced */
+            font-weight: 600;
         }
 
         .card-header p {
@@ -1400,7 +1426,7 @@
     <div id="appHeader" class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 1.5rem; margin-left: 1.5rem;">
             <div style="cursor: pointer;" onclick="navigateToProjectsHome()">
-                <div style="font-family: 'ParamountVistaSans', 'Fjalla One', sans-serif; font-size: 2rem; font-weight: 700; letter-spacing: 0.08em; color: #001d48; white-space: nowrap;">MEDIA PLANNER</div>
+                <div style="font-family: 'ParamountVistaSans', 'Fjalla One', sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.06em; color: var(--primary); white-space: nowrap;">MEDIA PLANNER</div>
             </div>
             <div style="width: 2px; height: 50px; background: #000a3c; opacity: 0.25; flex-shrink: 0;"></div>
             <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.3rem;">
@@ -1456,7 +1482,7 @@
             <div class="card">
                 <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
                     <div>
-                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Projects</h2>
+                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Projects</h2>
                         <p>Select an existing project or create a new one</p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -1488,7 +1514,7 @@
         <div id="screen-0-5" class="screen">
             <div class="card">
                 <div class="card-header">
-                    <h2 id="projectFormTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">New Project Information</h2>
+                    <h2 id="projectFormTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600;">New Project Information</h2>
                     <p>Enter the project and campaign details</p>
                 </div>
 
@@ -1565,7 +1591,7 @@
         <div id="screen-0-6" class="screen">
             <div class="card">
                 <div class="card-header">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Edit Project Information</h2>
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Edit Project Information</h2>
                     <p>Update the project and campaign details</p>
                 </div>
 
@@ -1653,7 +1679,7 @@
             <div class="card">
                 <div class="card-header" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;">
                     <div>
-                        <h2 id="versionProjectName" style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Project Name</h2>
+                        <h2 id="versionProjectName" style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Project Name</h2>
                         <div id="projectInfoSummary" style="margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; font-size: 0.82rem; color: var(--text-muted);"></div>
                         <div id="backendSyncStatus" style="margin-top: 0.3rem; font-size: 0.78rem; font-weight: 600;"></div>
                     </div>
@@ -1736,7 +1762,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Choose Package Type</h2>
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Choose Package Type</h2>
                     <p>Select the type of package you want to create</p>
                 </div>
 
@@ -1849,7 +1875,7 @@
         <div id="screen-1-sponsorship-type" class="screen">
             <div class="card">
                 <div class="card-header">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Sponsorship Package</h2>
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Sponsorship Package</h2>
                     <p>Select how you want to build this sponsorship</p>
                 </div>
 
@@ -1881,7 +1907,7 @@
         <div id="screen-1-sponsorship" class="screen">
             <div class="card">
                 <div class="card-header">
-                    <h2 id="sponsorshipSetupTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Simple Sponsorship</h2>
+                    <h2 id="sponsorshipSetupTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Simple Sponsorship</h2>
                     <p id="sponsorshipSetupSubtitle">Enter the package details below</p>
                 </div>
 
@@ -1961,7 +1987,7 @@
         <div id="screen-1-sponsorship-mapping" class="screen">
             <div class="card">
                 <div class="card-header">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Map Your Columns</h2>
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Map Your Columns</h2>
                     <p>Confirm or adjust which columns contain your sponsorship data</p>
                 </div>
 
@@ -2059,7 +2085,7 @@
         <div id="screen-1-sponsorship-types" class="screen">
             <div class="card">
                 <div class="card-header">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Assign Placement Types & Costs</h2>
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Assign Placement Types & Costs</h2>
                     <p>Categorize each line item and add costs to calculate margins</p>
                 </div>
 
@@ -2140,7 +2166,7 @@
         <div id="screen-1-brand-funded" class="screen">
             <div class="card">
                 <div class="card-header">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Brand Funded Content</h2>
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Brand Funded Content</h2>
                     <p>Enter the package title and total investment</p>
                 </div>
 
@@ -2190,7 +2216,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2 id="packageDetailsTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Package Setup & Distribution</h2>
+                    <h2 id="packageDetailsTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Package Setup & Distribution</h2>
                     <p id="packageDetailsDesc">Configure investment details and platform allocation</p>
                 </div>
 
@@ -2757,7 +2783,7 @@
                 <!-- Production & Talent Markup Section -->
                 <div id="talentMarkupSection" style="margin-bottom: 3rem; background: #F8FAFB; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
                     <div style="margin: 0 0 1rem;">
-                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase; margin: 0 0 0.25rem; font-size: 1.25rem; color: #1e293b; font-weight: 700;">Production & Talent</h2>
+                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; margin: 0 0 0.25rem; font-size: 1.25rem; color: #1e293b; font-weight: 700;">Production & Talent</h2>
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
                             <p style="margin: 0; color: var(--text-muted); font-size: 0.875rem;">Production & Talent Markup (%) (☑ to edit)<br>Default is 25%. This determines the margin on production costs.</p>
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
@@ -2790,7 +2816,7 @@
 
                 <div style="background: #F8FAFB; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
                     <div style="margin: 0 0 1rem;">
-                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase; margin: 0 0 0.25rem; font-size: 1.25rem; color: #1e293b; font-weight: 700;">Media Placement Pricing & Premiums</h2>
+                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; margin: 0 0 0.25rem; font-size: 1.25rem; color: #1e293b; font-weight: 700;">Media Placement Pricing & Premiums</h2>
                         <p style="margin: 0; color: var(--text-muted); font-size: 0.875rem;">Set the CPM pricing and apply premiums for each placement</p>
                     </div>
 
@@ -2848,7 +2874,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Cost & Margin Calculation</h2>
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Cost & Margin Calculation</h2>
                     <p>Define markup percentages to calculate costs and margins</p>
                 </div>
 
@@ -2953,7 +2979,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2 id="summaryPackageTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Plan Summary</h2>
+                    <h2 id="summaryPackageTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Plan Summary</h2>
                     <p>Complete breakdown of pricing, costs, and margins</p>
                 </div>
 
@@ -3061,7 +3087,7 @@
             
             <div class="card">
                 <div class="card-header">
-                    <h2 id="versionSummaryTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Version Summary</h2>
+                    <h2 id="versionSummaryTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Version Summary</h2>
                     <p>All packages in this version</p>
                 </div>
 
@@ -3084,7 +3110,7 @@
         <!-- Closed Deals Section -->
         <div id="closeddeals-section" class="tab-content">
             <div style="text-align: center; padding: 1.5rem 0;">
-                <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase; color: var(--primary); font-size: 2rem; margin-bottom: 0.5rem;">Closed Deals</h2>
+                <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; color: var(--primary); font-size: 2rem; margin-bottom: 0.5rem;">Closed Deals</h2>
                 <p style="color: var(--text-muted); font-size: 1rem;">Versions marked as the closed/sold plan across all projects, with Finance/Ops verification status</p>
             </div>
 
@@ -3104,7 +3130,7 @@
             <!-- Tools Menu -->
             <div id="tools-menu" class="tool-screen active">
                 <div style="text-align: center; padding: 2rem 0;">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase; color: var(--primary); font-size: 2rem; margin-bottom: 0.5rem;">Budgeting & Planning Tools</h2>
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; color: var(--primary); font-size: 2rem; margin-bottom: 0.5rem;">Budgeting & Planning Tools</h2>
                     <p style="color: var(--text-muted); font-size: 1rem;">Select a tool to help with your media planning calculations</p>
                 </div>
 
@@ -3166,7 +3192,7 @@
                 
                 <div class="card">
                     <div class="card-header">
-                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Flat Fee Budgeting Tool</h2>
+                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Flat Fee Budgeting Tool</h2>
                         <p>Calculate production and talent budgets or pricing based on markup percentages</p>
                     </div>
 
@@ -3268,7 +3294,7 @@
                 
                 <div class="card">
                     <div class="card-header">
-                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Blended Social Package Calculator</h2>
+                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Blended Social Package Calculator</h2>
                         <p>Calculate pricing, budgets, and margins for blended social media packages</p>
                     </div>
 
@@ -3491,7 +3517,7 @@
                 
                 <div class="card">
                     <div class="card-header">
-                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Media % Lookup Tool</h2>
+                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Media % Lookup Tool</h2>
                         <p>Lookup recommended media percentages for branded content and influence campaigns</p>
                     </div>
 
@@ -3597,7 +3623,7 @@
     <!-- Custom Alert Dialog -->
     <div id="alertDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
         <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 style="margin-bottom: 1rem; color: var(--primary); display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative;top:-1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Attention</h3>
+            <h3 style="margin-bottom: 1rem; color: var(--primary); display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'PeakSans', sans-serif; font-weight: 600;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative;top:-1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Attention</h3>
             <p style="margin-bottom: 2rem; color: var(--text); line-height: 1.6;" id="alertMessage"></p>
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button class="btn-primary" onclick="closeAlert()" style="min-width: 100px; text-align: center; justify-content: center;">OK</button>
@@ -3608,7 +3634,7 @@
     <!-- Verify Closed Deal Dialog -->
     <div id="verifyDealDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 550px; width: 90%; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 id="verifyDealTitle" style="margin-bottom: 0.75rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Verify Closed Deal</h3>
+            <h3 id="verifyDealTitle" style="margin-bottom: 0.75rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600;">Verify Closed Deal</h3>
             <div style="background: var(--background); border-left: 3px solid var(--primary); border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
                 This step is intended for Finance, Operations, or a Manager to confirm that this saved plan matches what was actually sold. If it doesn't match exactly, please edit the plan first so it does, then verify.
             </div>
@@ -3631,7 +3657,7 @@
          available locally, but multiple similarly-named candidates were found) -->
     <div id="dealMatchPickerDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 550px; width: 90%; max-height: 80vh; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
-            <h3 style="margin-bottom: 0.75rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Which Plan Did You Mean?</h3>
+            <h3 style="margin-bottom: 0.75rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600;">Which Plan Did You Mean?</h3>
             <div style="background: var(--background); border-left: 3px solid var(--primary); border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
                 We couldn't find the exact verified plan locally (it may have been created in a different browser), but found more than one similarly-named project. Pick the one you meant — this may or may not be the exact same plan that was verified elsewhere.
             </div>
@@ -3646,7 +3672,7 @@
     <!-- Generate External Plan Modal -->
     <div id="externalPlanDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 540px; width: 90%; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 style="margin-bottom: 0.5rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase;">Generate External Plan</h3>
+            <h3 style="margin-bottom: 0.5rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600;">Generate External Plan</h3>
             <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">Select the versions to include. The plan will be generated as a Google Sheet.</p>
             <div style="margin-bottom: 1.5rem;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
@@ -16104,7 +16130,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                 if (item._isHeader) {
                     container.innerHTML += `
                         <div style="margin: 1rem 0 0.5rem 0; padding: 0.5rem 0.75rem; background: #000a3c; border-radius: 6px; display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; color: white; letter-spacing: 0.05em;">${item.label}</span>
+                            <span style="font-family: 'PeakSans', sans-serif; font-weight: 600; font-size: 0.85rem; color: white; letter-spacing: 0.05em;">${item.label}</span>
                             <span style="font-size: 0.7rem; background: rgba(255,255,255,0.2); color: white; padding: 0.15rem 0.4rem; border-radius: 3px; margin-left: auto;">SECTION HEADER</span>
                         </div>`;
                 } else {
@@ -16220,7 +16246,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             if (item.type === 'section_header') {
                 return `
                     <div style="margin: 1rem 0 0.5rem 0; padding: 0.5rem 0.75rem; background: #000a3c; border-radius: 6px; display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; color: white; letter-spacing: 0.05em;">${item.label}</span>
+                        <span style="font-family: 'PeakSans', sans-serif; font-weight: 600; font-size: 0.85rem; color: white; letter-spacing: 0.05em;">${item.label}</span>
                         <span style="font-size: 0.7rem; background: rgba(255,255,255,0.2); color: white; padding: 0.15rem 0.4rem; border-radius: 3px; margin-left: auto;">SECTION HEADER</span>
                     </div>
                 `;
@@ -17046,7 +17072,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             <div style="background: white; border-radius: 12px; max-width: 1400px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
                 <div style="position: sticky; top: 0; background: white; padding: 1.5rem 1.5rem 0; border-bottom: 2px solid var(--border); z-index: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; text-transform: uppercase; margin: 0; color: var(--primary);" id="modalPackageTitle">Media Plan Summary</h2>
+                        <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; margin: 0; color: var(--primary);" id="modalPackageTitle">Media Plan Summary</h2>
                         <div style="display: flex; gap: 0.75rem; align-items: center;">
                             <button onclick="exportSummaryToExcel()" class="btn-secondary btn-sm" style="padding: 0.5rem 1rem;">📊 Export Excel</button>
                             <button onclick="exportSummaryToPDF()" class="btn-success btn-sm" style="padding: 0.5rem 1rem;">📄 Export PDF</button>
