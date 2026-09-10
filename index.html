@@ -1596,89 +1596,12 @@
             </div>
         </div>
 
-        <!-- Screen 0.6: Edit Project Form -->
-        <div id="screen-0-6" class="screen">
-            <div class="card">
-                <div class="card-header">
-                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Edit Project Information</h2>
-                    <p>Update the project and campaign details</p>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Brand Name <span class="required">*</span></label>
-                        <input type="text" id="editBrandName" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Sub-Brand Name <span class="required">*</span></label>
-                        <input type="text" id="editSubBrandName" required>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Project Name <span class="required">*</span></label>
-                        <input type="text" id="editProjectName" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Agency Name <span class="required">*</span></label>
-                        <input type="text" id="editAgencyName" required>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Campaign Start Date</label>
-                        <input type="date" id="editCampaignStartDate">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Campaign End Date</label>
-                        <input type="date" id="editCampaignEndDate">
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                    <div>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Planner Name (Optional)</label>
-                        <input type="text" id="editPlannerName" placeholder="e.g. Jane Smith" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); box-sizing: border-box;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Planner Email (Optional)</label>
-                        <input type="email" id="editPlannerEmail" placeholder="e.g. jane@paramount.com" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); box-sizing: border-box;">
-                    </div>
-                </div>
-
-                <div style="margin-top: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Budget Sheet (Optional)</label>
-                    <input type="url" id="editBudgetSheetLink" placeholder="https://..." style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
-                </div>
-
-                <div style="margin-top: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Media Plan Link (Optional)</label>
-                    <input type="url" id="editMediaPlanLink" placeholder="https://..." style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
-                </div>
-
-                <div style="margin-top: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Salesforce Link (Optional)</label>
-                    <input type="url" id="editSalesforceLink" placeholder="https://example.salesforce.com/..." style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-secondary" onclick="cancelEditProject()">Cancel</button>
-                    <button class="btn-primary" onclick="saveProjectInfo()">Save Changes</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Screen 0.75: Version Management -->
         <div id="screen-0-75" class="screen">
             <!-- Sticky Action Bar -->
             <div style="position: sticky; top: 0; z-index: 100; background: white; padding: 1rem 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-                    <button class="btn-secondary" onclick="backToProjects()" style="padding: 0.6rem 1.25rem 0.6rem 1rem; display: inline-flex; align-items: center; gap: 0.4rem; margin-left: 1rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Back to Projects</button>
+                    <button class="btn-secondary" onclick="backToProjects()" style="padding: 0.6rem 1.25rem 0.6rem 1rem; display: inline-flex; align-items: center; gap: 0.4rem; margin-left: 1rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Back to Assignments</button>
                     <div style="flex: 1;"></div>
                     <button onclick="showExternalPlanModal()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; background: #001A6E; color: #ffffff; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Generate External Plan</button>
                     <button class="btn-primary" onclick="createNewVersion()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; border: 2px solid #d9dae2; margin-right: 1rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create New Version</button>
@@ -1693,7 +1616,6 @@
                         <div id="backendSyncStatus" style="margin-top: 0.3rem; font-size: 0.78rem; font-weight: 600;"></div>
                     </div>
                     <div style="display: flex; gap: 0.5rem; flex-shrink: 0; margin-top: 0.25rem;">
-                        <button class="btn-secondary" onclick="editProjectInfo()" style="padding: 0.45rem 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"/></svg> Edit Project Info</button>
                         <button class="btn-secondary" onclick="createNewVersionFolder()" style="padding: 0.45rem 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg> New Folder</button>
                     </div>
                 </div>
@@ -1720,7 +1642,10 @@
 
                 <!-- Project Files (confirmed 2026-09-04) — upload any supporting
                      document straight into this project's Drive folder without
-                     leaving the app. -->
+                     leaving the app. Links (confirmed 2026-09-10) cover
+                     something that already lives elsewhere (a client's
+                     shared deck, a WeTransfer link) without downloading and
+                     re-uploading it just to have it show up in this list. -->
                 <div style="margin-bottom: 1.25rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 8px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
                         <strong style="font-size: 0.85rem;">Project Files</strong>
@@ -1730,6 +1655,11 @@
                         </div>
                     </div>
                     <div id="projectFileUploadStatus" style="font-size: 0.8rem; margin-top: 0.4rem;"></div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap;">
+                        <input type="text" id="projectFileLinkName" placeholder="Link name" style="font-size: 0.8rem; padding: 0.35rem 0.5rem; flex: 1; min-width: 120px;">
+                        <input type="url" id="projectFileLinkUrl" placeholder="https://..." style="font-size: 0.8rem; padding: 0.35rem 0.5rem; flex: 2; min-width: 180px;">
+                        <button class="btn-secondary btn-sm" onclick="addProjectFileLink()">Add Link</button>
+                    </div>
                     <ul id="projectFileList" style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.85rem;"></ul>
                 </div>
 
@@ -4388,13 +4318,70 @@
             if (!currentProject || !listEl) return;
             listEl.innerHTML = '<li>Loading…</li>';
             try {
-                const files = await backendJsonpRequest({ action: 'listProjectFiles', projectId: currentProject.id });
-                listEl.innerHTML = files.length === 0
-                    ? '<li style="color: var(--text-muted); list-style: none; margin-left: -1.1rem;">No files uploaded yet.</li>'
-                    : files.map(f => `<li><a href="${f.url}" target="_blank" rel="noreferrer">${escapeHtml(f.name)}</a></li>`).join('');
+                const [files, links] = await Promise.all([
+                    backendJsonpRequest({ action: 'listProjectFiles', projectId: currentProject.id }),
+                    backendJsonpRequest({ action: 'listProjectFileLinks', projectId: currentProject.id }),
+                ]);
+                if (files.length === 0 && links.length === 0) {
+                    listEl.innerHTML = '<li style="color: var(--text-muted); list-style: none; margin-left: -1.1rem;">No files or links added yet.</li>';
+                    return;
+                }
+                const fileItems = files.map(f => `<li><a href="${f.url}" target="_blank" rel="noreferrer" style="color: var(--accent);">${escapeHtml(f.name)}</a></li>`);
+                const linkItems = links.map(l => `<li><a href="${l.url}" target="_blank" rel="noreferrer" style="color: var(--accent);">🔗 ${escapeHtml(l.name)}</a> <span class="delete-icon" onclick="deleteProjectFileLink('${l.id}')" title="Remove link">✕</span></li>`);
+                listEl.innerHTML = fileItems.concat(linkItems).join('');
             } catch (e) {
                 listEl.innerHTML = '<li style="color: crimson; list-style: none; margin-left: -1.1rem;">Could not load files.</li>';
             }
+        }
+
+        async function addProjectFileLink() {
+            const nameInput = document.getElementById('projectFileLinkName');
+            const urlInput = document.getElementById('projectFileLinkUrl');
+            const statusEl = document.getElementById('projectFileUploadStatus');
+            const name = nameInput.value.trim();
+            const url = urlInput.value.trim();
+            if (!name || !url) {
+                statusEl.textContent = 'Enter both a name and a URL to add a link.';
+                statusEl.style.color = 'crimson';
+                return;
+            }
+            statusEl.textContent = 'Adding link…';
+            statusEl.style.color = '';
+            const id = generateId();
+            try {
+                await backendPost({ action: 'addProjectFileLink', payload: JSON.stringify({ id, projectId: currentProject.id, name, url }) });
+                let found = false;
+                for (let i = 0; i < 8 && !found; i++) {
+                    await new Promise((r) => setTimeout(r, 800));
+                    const links = await backendJsonpRequest({ action: 'listProjectFileLinks', projectId: currentProject.id });
+                    found = links.some((l) => l.id === id);
+                }
+                if (found) {
+                    statusEl.textContent = 'Link added.';
+                    statusEl.style.color = 'green';
+                    nameInput.value = '';
+                    urlInput.value = '';
+                    loadProjectFileList();
+                } else {
+                    statusEl.textContent = 'Adding the link may have failed — try again.';
+                    statusEl.style.color = 'crimson';
+                }
+            } catch (e) {
+                statusEl.textContent = 'Could not add link: ' + e.message;
+                statusEl.style.color = 'crimson';
+            }
+        }
+
+        async function deleteProjectFileLink(id) {
+            showConfirm('Remove this link from Project Files?', async (confirmed) => {
+                if (!confirmed) return;
+                try {
+                    await backendPost({ action: 'deleteProjectFileLink', payload: JSON.stringify({ id }) });
+                    loadProjectFileList();
+                } catch (e) {
+                    customAlert('Could not remove link: ' + e.message);
+                }
+            }, 'Remove', 'btn-danger');
         }
 
         function fileToBase64(file) {
@@ -5180,67 +5167,6 @@
         }
 
         // Edit project information
-        function editProjectInfo() {
-            // Populate the edit form with current project data
-            document.getElementById('editAgencyName').value = currentProject.agencyName || '';
-            document.getElementById('editBrandName').value = currentProject.brandName || '';
-            document.getElementById('editSubBrandName').value = currentProject.subBrandName || '';
-            document.getElementById('editProjectName').value = currentProject.projectName || '';
-            document.getElementById('editCampaignStartDate').value = currentProject.campaignStartDate || '';
-            document.getElementById('editCampaignEndDate').value = currentProject.campaignEndDate || '';
-            document.getElementById('editSalesforceLink').value = currentProject.salesforceLink || '';
-            document.getElementById('editBudgetSheetLink').value = currentProject.budgetSheetLink || '';
-            document.getElementById('editMediaPlanLink').value = currentProject.mediaPlanLink || '';
-            document.getElementById('editPlannerName').value = currentProject.plannerName || '';
-            document.getElementById('editPlannerEmail').value = currentProject.plannerEmail || '';
-            
-            showScreen('screen-0-6');
-        }
-
-        function cancelEditProject() {
-            // Go back to versions screen
-            displayVersions();
-            showScreen('screen-0-75');
-        }
-
-        function saveProjectInfo() {
-            const agencyName = document.getElementById('editAgencyName').value;
-            const brandName = document.getElementById('editBrandName').value;
-            const subBrandName = document.getElementById('editSubBrandName').value;
-            const projectName = document.getElementById('editProjectName').value;
-            const campaignStartDate = document.getElementById('editCampaignStartDate').value;
-            const campaignEndDate = document.getElementById('editCampaignEndDate').value;
-            const salesforceLink = document.getElementById('editSalesforceLink').value;
-            const budgetSheetLink = document.getElementById('editBudgetSheetLink').value;
-            const mediaPlanLink = document.getElementById('editMediaPlanLink').value;
-            const plannerName = document.getElementById('editPlannerName').value;
-            const plannerEmail = document.getElementById('editPlannerEmail').value;
-
-            if (!agencyName || !brandName || !subBrandName || !projectName) {
-                customAlert('Please fill in all required fields');
-                return;
-            }
-
-            // Update current project
-            currentProject.agencyName = agencyName;
-            currentProject.brandName = brandName;
-            currentProject.subBrandName = subBrandName;
-            currentProject.projectName = projectName;
-            currentProject.campaignStartDate = campaignStartDate;
-            currentProject.campaignEndDate = campaignEndDate;
-            currentProject.salesforceLink = salesforceLink;
-            currentProject.budgetSheetLink = budgetSheetLink;
-            currentProject.mediaPlanLink = mediaPlanLink;
-            currentProject.plannerName = plannerName;
-            currentProject.plannerEmail = plannerEmail;
-
-            saveProjects();
-            
-            // Go back to versions screen
-            displayVersions();
-            showScreen('screen-0-75');
-        }
-
         // Project rename and duplicate functions
         function renameProject(index) {
             const project = projects[index];
@@ -5338,13 +5264,13 @@
                 summaryEl.innerHTML = parts.map(({ icon, text }) =>
                     `<span style="display:inline-flex;align-items:center;gap:0.3rem;">${icon} ${escapeHtml(text)}</span>`
                 ).join('') + [
-                    p.salesforceLink ? `<a href="${escapeHtml(p.salesforceLink)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--primary);text-decoration:none;font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Salesforce</a>` : '',
-                    p.budgetSheetLink ? `<a href="${escapeHtml(p.budgetSheetLink)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--primary);text-decoration:none;font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Budget Sheet</a>` : '',
-                    p.mediaPlanLink ? `<a href="${escapeHtml(p.mediaPlanLink)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--primary);text-decoration:none;font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Media Plan</a>` : '',
+                    p.salesforceLink ? `<a href="${escapeHtml(p.salesforceLink)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--accent);text-decoration:none;font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Salesforce</a>` : '',
+                    p.budgetSheetLink ? `<a href="${escapeHtml(p.budgetSheetLink)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--accent);text-decoration:none;font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Budget Sheet</a>` : '',
+                    p.mediaPlanLink ? `<a href="${escapeHtml(p.mediaPlanLink)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--accent);text-decoration:none;font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Media Plan</a>` : '',
                     // Confirmed 2026-09-09 — the Planner view had no visible
                     // link to the project's own Drive folder at all (only
                     // stored on pull, never rendered anywhere).
-                    p.driveFolderLink ? `<a href="${escapeHtml(p.driveFolderLink)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--primary);text-decoration:none;font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Drive Folder</a>` : '',
+                    p.driveFolderLink ? `<a href="${escapeHtml(p.driveFolderLink)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--accent);text-decoration:none;font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Drive Folder</a>` : '',
                 ].filter(Boolean).join('');
             }
             const container = document.getElementById('versionsList');
@@ -7300,7 +7226,20 @@
             newVersion.id = generateId();
             newVersion.name = 'Copy of ' + (originalVersion.name || `Version ${index + 1}`);
             newVersion.createdAt = new Date().toISOString();
-            
+
+            // A duplicate is a fresh working copy — Verbal/Closed/Verified/
+            // Complete are recorded facts about the *original* deal/version,
+            // not something that should already be true of a copy nobody
+            // has reviewed yet (confirmed 2026-09-10).
+            delete newVersion.dealStatus;
+            delete newVersion.verifiedBy;
+            delete newVersion.verifiedAt;
+            delete newVersion.verificationNotes;
+            delete newVersion.markedClosedAt;
+            delete newVersion.markedVerbalPendingAt;
+            delete newVersion.dealSnapshot;
+            newVersion.completedDate = null;
+
             currentProject.versions.push(newVersion);
             saveProjects();
             displayVersions();
