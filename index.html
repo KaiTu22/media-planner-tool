@@ -1529,13 +1529,13 @@
 
                 <div class="grid-2">
                     <div class="form-group">
-                        <label>Brand Name <span class="required">*</span></label>
-                        <input type="text" id="brandName" required>
+                        <label>Account <span class="required">*</span></label>
+                        <input type="text" id="account" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Sub-Brand Name <span class="required">*</span></label>
-                        <input type="text" id="subBrandName" required>
+                        <label>Brand <span class="required">*</span></label>
+                        <input type="text" id="brand" required>
                     </div>
                 </div>
 
@@ -1615,8 +1615,12 @@
                         <div id="projectInfoSummary" style="margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; font-size: 0.82rem; color: var(--text-muted);"></div>
                         <div id="backendSyncStatus" style="margin-top: 0.3rem; font-size: 0.78rem; font-weight: 600;"></div>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; flex-shrink: 0; margin-top: 0.25rem;">
-                        <button class="btn-secondary" onclick="createNewVersionFolder()" style="padding: 0.45rem 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg> New Folder</button>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; flex-shrink: 0; margin-top: 0.25rem;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-secondary" onclick="refreshVersionsFromBackend()" style="padding: 0.45rem 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh from Backend</button>
+                            <button class="btn-secondary" onclick="createNewVersionFolder()" style="padding: 0.45rem 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg> New Folder</button>
+                        </div>
+                        <div id="versionsRefreshStatus" style="font-size: 0.78rem; color: var(--text-muted);"></div>
                     </div>
                 </div>
 
@@ -4122,8 +4126,8 @@
         async function mapProjectToBackendPayload(project) {
             const payload = { id: project.id };
             if (project.projectName) payload.projectName = project.projectName;
-            if (project.brandName) payload.account = project.brandName;
-            if (project.subBrandName) payload.brand = project.subBrandName;
+            if (project.account) payload.account = project.account;
+            if (project.brand) payload.brand = project.brand;
             if (project.agencyName) payload.agency = project.agencyName;
             if (project.campaignStartDate) payload.campaignStartDate = project.campaignStartDate;
             if (project.campaignEndDate) payload.campaignEndDate = project.campaignEndDate;
@@ -4280,8 +4284,8 @@
                 projects.push({
                     id: bp.id,
                     projectName: bp.projectName || '',
-                    brandName: bp.account || '',
-                    subBrandName: bp.brand || '',
+                    account: bp.account || '',
+                    brand: bp.brand || '',
                     agencyName: bp.agency || '',
                     campaignStartDate: bp.campaignStartDate || '',
                     campaignEndDate: bp.campaignEndDate || '',
@@ -4305,6 +4309,43 @@
                 displayProjects();
             }
             return pulledCount;
+        }
+
+        // Versions built in this browser get synced up to the backend's
+        // Versions sheet (full packages included, see mapVersionToBackendPayload),
+        // but nothing ever pulled that data back down — so a project opened in
+        // a browser that didn't build its versions (e.g. via the Plans Log's
+        // "Open Planner" link on a different machine/profile) looked like it
+        // had no versions at all, even though they were safely stored server-
+        // side. This only ever ADDS versions missing locally by id — it never
+        // touches or overwrites one that already exists locally, mirroring the
+        // same non-destructive rule pullAssignedProjects() uses above.
+        async function backfillMissingVersionsFromBackend(project) {
+            let backendVersions;
+            try {
+                backendVersions = await backendJsonpRequest({ action: 'listVersions' });
+            } catch (e) {
+                console.error('Could not fetch versions from backend:', e);
+                return 0;
+            }
+            const localIds = new Set((project.versions || []).map(v => v.id));
+            const missing = backendVersions.filter(v => v.projectId === project.id && !localIds.has(v.id));
+            missing.forEach(bv => {
+                const version = {
+                    id: bv.id,
+                    name: bv.name || '',
+                    completedDate: bv.completedDate || null,
+                    dealStatus: bv.versionStatus || null,
+                    folderId: bv.folderId || null,
+                    packages: bv.packages || [],
+                    createdAt: bv.createdAt || new Date().toISOString(),
+                };
+                normalizeSponsorshipData(version.packages);
+                project.versions.push(version);
+                markVersionSyncedToBackend(bv.id); // next sync updates rather than re-creates
+            });
+            if (missing.length > 0) saveProjects();
+            return missing.length;
         }
 
         // Project Files (confirmed 2026-09-04) — lets a planner attach any
@@ -4462,8 +4503,10 @@
             updateSupabaseSyncIndicator();
             retryPendingSupabaseSyncs(); // pick up anything left unsynced from a previous session
             retryPendingBackendSyncs(); // pick up anything left unsynced from a previous session
-            pullAssignedProjects().then(function () { // fire and forget — pick up new Assignment-created projects
+            pullAssignedProjects().then(async function () { // fire and forget — pick up new Assignment-created projects
                 if (IS_EMBEDDED && DEEP_LINK_PROJECT_ID) {
+                    const project = projects.find(p => p.id === DEEP_LINK_PROJECT_ID);
+                    if (project) await backfillMissingVersionsFromBackend(project);
                     selectProjectById(DEEP_LINK_PROJECT_ID);
                 }
             });
@@ -4568,8 +4611,8 @@
             });
         }
 
-        const CURRENT_SCHEMA_VERSION = "2.1";
-        
+        const CURRENT_SCHEMA_VERSION = "2.2";
+
         // Migration functions for upgrading old data formats
         function migrateData(data) {
             // No version = pre-versioning data (before this feature was added)
@@ -4577,7 +4620,7 @@
                 console.log("Migrating legacy data to schema v1.0");
                 data = migrateToV1(data);
             }
-            
+
             if (data.schemaVersion === "1.0") {
                 console.log("Migrating data to schema v2.0");
                 data = migrateToV2(data);
@@ -4587,7 +4630,47 @@
                 console.log("Migrating data to schema v2.1");
                 data = migrateToV21(data);
             }
-            
+
+            if (data.schemaVersion === "2.1") {
+                console.log("Migrating data to schema v2.2");
+                data = migrateToV22(data);
+            }
+
+            return data;
+        }
+
+        // v2.2: terminology cleanup — brandName/subBrandName are renamed to
+        // account/brand to match the Salesforce vocabulary the rest of the
+        // system (Assignment form, Log, backend schema) already uses. Also
+        // renames the same two keys inside each version's frozen deal
+        // snapshot (captureDealSnapshot's identification block), so a
+        // project's historical snapshots stay internally consistent with
+        // the project itself after migration.
+        function migrateToV22(data) {
+            const projects = data.projects || [];
+            projects.forEach(project => {
+                if (project.brandName !== undefined) {
+                    project.account = project.brandName;
+                    delete project.brandName;
+                }
+                if (project.subBrandName !== undefined) {
+                    project.brand = project.subBrandName;
+                    delete project.subBrandName;
+                }
+                (project.versions || []).forEach(version => {
+                    const id = version.dealSnapshot && version.dealSnapshot.identification;
+                    if (!id) return;
+                    if (id.brandName !== undefined) {
+                        id.account = id.brandName;
+                        delete id.brandName;
+                    }
+                    if (id.subBrandName !== undefined) {
+                        id.brand = id.subBrandName;
+                        delete id.subBrandName;
+                    }
+                });
+            });
+            data.schemaVersion = "2.2";
             return data;
         }
 
@@ -4739,26 +4822,31 @@
                 const saved = localStorage.getItem('mediaPlanner_projects');
                 if (saved) {
                     let data = JSON.parse(saved);
-                    
+                    const schemaVersionBeforeMigration = data.schemaVersion;
+
                     // Migrate data if needed
                     data = migrateData(data);
-                    
+
                     // Update lastModified timestamp
                     data.lastModified = new Date().toISOString();
-                    
+
                     // Extract projects array
                     projects = data.projects || [];
-                    
+
                     // Normalize sponsorship data (lineItems → sponsorshipLineItems)
                     projects.forEach(project => {
                         project.versions.forEach(version => {
                             normalizeSponsorshipData(version.packages);
                         });
                     });
-                    
-                    // Save back with updated schema if migration occurred
-                    if (data.schemaVersion !== CURRENT_SCHEMA_VERSION) {
-                        data.schemaVersion = CURRENT_SCHEMA_VERSION;
+
+                    // Save back with updated schema if migration occurred. Compare
+                    // against the schema version seen *before* migrateData() ran —
+                    // migrateData() always walks data.schemaVersion up to
+                    // CURRENT_SCHEMA_VERSION by the time it returns, so comparing
+                    // against the post-migration value here would never detect
+                    // that a migration actually happened.
+                    if (schemaVersionBeforeMigration !== CURRENT_SCHEMA_VERSION) {
                         localStorage.setItem('mediaPlanner_projects', JSON.stringify(data));
                         console.log(`Data migrated to schema v${CURRENT_SCHEMA_VERSION}`);
                     }
@@ -4885,8 +4973,8 @@
                 sortedIndices = sortedIndices.filter(i => {
                     const p = projects[i];
                     return (p.projectName || '').toLowerCase().includes(query) ||
-                           (p.brandName || '').toLowerCase().includes(query) ||
-                           (p.subBrandName || '').toLowerCase().includes(query) ||
+                           (p.account || '').toLowerCase().includes(query) ||
+                           (p.brand || '').toLowerCase().includes(query) ||
                            (p.agencyName || '').toLowerCase().includes(query) ||
                            (p.versions || []).some(v => (v.name||'').toLowerCase().includes(query) || (v.notes||'').toLowerCase().includes(query));
                 });
@@ -4899,9 +4987,9 @@
 
             function makeProjectCard(index) {
                 const project = projects[index];
-                const brandLine = project.subBrandName
-                    ? project.brandName + ' • ' + project.subBrandName + ' • ' + project.agencyName
-                    : project.brandName + ' • ' + project.agencyName;
+                const brandLine = project.brand
+                    ? project.account + ' • ' + project.brand + ' • ' + project.agencyName
+                    : project.account + ' • ' + project.agencyName;
                 let dateLine = '';
                 if (project.campaignStartDate || project.campaignEndDate) {
                     dateLine = '<br>' + formatCampaignPeriod(project.campaignStartDate, project.campaignEndDate);
@@ -5068,8 +5156,8 @@
 
         function createProject() {
             const agencyName = document.getElementById('agencyName').value;
-            const brandName = document.getElementById('brandName').value;
-            const subBrandName = document.getElementById('subBrandName').value;
+            const account = document.getElementById('account').value;
+            const brand = document.getElementById('brand').value;
             const projectName = document.getElementById('projectName').value;
             const campaignStartDate = document.getElementById('campaignStartDate').value;
             const campaignEndDate = document.getElementById('campaignEndDate').value;
@@ -5079,7 +5167,7 @@
             const plannerName = document.getElementById('plannerName').value;
             const plannerEmail = document.getElementById('plannerEmail').value;
 
-            if (!agencyName || !brandName || !subBrandName || !projectName) {
+            if (!agencyName || !account || !brand || !projectName) {
                 customAlert('Please fill in all required fields');
                 return;
             }
@@ -5087,8 +5175,8 @@
             const project = {
                 id: generateId(),
                 agencyName,
-                brandName,
-                subBrandName,
+                account,
+                brand,
                 projectName,
                 campaignStartDate,
                 campaignEndDate,
@@ -5103,11 +5191,11 @@
 
             projects.push(project);
             saveProjects();
-            
+
             // Clear form
             document.getElementById('agencyName').value = '';
-            document.getElementById('brandName').value = '';
-            document.getElementById('subBrandName').value = '';
+            document.getElementById('account').value = '';
+            document.getElementById('brand').value = '';
             document.getElementById('projectName').value = '';
             document.getElementById('campaignStartDate').value = '';
             document.getElementById('campaignEndDate').value = '';
@@ -5242,6 +5330,21 @@
         // ── Version folder state (session only) ──
         let collapsedVersionFolders = {};
 
+        // Manual counterpart to the deep-link auto-backfill in window.onload
+        // — covers opening this project the normal way (not via a Plans Log
+        // deep link) in a browser that never built some of its versions.
+        async function refreshVersionsFromBackend() {
+            const statusEl = document.getElementById('versionsRefreshStatus');
+            if (statusEl) statusEl.textContent = 'Checking backend for versions…';
+            const count = await backfillMissingVersionsFromBackend(currentProject);
+            if (statusEl) {
+                statusEl.textContent = count > 0
+                    ? `Pulled ${count} version(s) from the backend.`
+                    : 'Already up to date.';
+            }
+            if (count > 0) displayVersions();
+        }
+
         function displayVersions() {
             document.getElementById('versionProjectName').textContent = currentProject.projectName;
 
@@ -5252,7 +5355,7 @@
                 const parts = [];
 
                 // Brand / Sub-brand / Agency
-                const brandParts = [p.brandName, p.subBrandName, p.agencyName].filter(Boolean);
+                const brandParts = [p.account, p.brand, p.agencyName].filter(Boolean);
                 if (brandParts.length) parts.push({ icon: '🏢', text: brandParts.join(' · ') });
 
                 // Campaign dates
@@ -5789,7 +5892,7 @@
         // Closed Deals list UI state
         let closedDealsSelectedIds = new Set();
         let closedDealsExpandedIds = new Set();
-        let closedDealsFilters = { brand: '', agency: '', dateFrom: '', dateTo: '', dealCategory: '', dealStatus: '', tentpoleShow: '' };
+        let closedDealsFilters = { account: '', agency: '', dateFrom: '', dateTo: '', dealCategory: '', dealStatus: '', tentpoleShow: '' };
 
         // ====================================================================
         // SHARED CLOSED DEAL STORAGE (Supabase)
@@ -5868,8 +5971,8 @@
                 project_id: deal.project.id,
                 version_id: deal.version.id,
                 project_name: deal.project.projectName || '',
-                brand_name: deal.project.brandName || '',
-                sub_brand_name: deal.project.subBrandName || '',
+                brand_name: deal.project.account || '',
+                sub_brand_name: deal.project.brand || '',
                 agency_name: deal.project.agencyName || '',
                 version_name: deal.version.name || '',
                 deal_category: deal.project.dealCategory || null,
@@ -6006,8 +6109,8 @@
                 capturedAt: new Date().toISOString(),
                 identification: {
                     projectName: project.projectName || '',
-                    brandName: project.brandName || '',
-                    subBrandName: project.subBrandName || '',
+                    account: project.account || '',
+                    brand: project.brand || '',
                     agencyName: project.agencyName || '',
                     plannerName: project.plannerName || '',
                     plannerEmail: project.plannerEmail || '',
@@ -6404,16 +6507,27 @@
         function getDealFullDetail(deal) {
             const snapshot = deal.version.dealSnapshot;
 
-            const identification = snapshot ? snapshot.identification : {
+            const rawIdentification = snapshot ? snapshot.identification : {
                 projectName: deal.project.projectName || '',
-                brandName: deal.project.brandName || '',
-                subBrandName: deal.project.subBrandName || '',
+                account: deal.project.account || '',
+                brand: deal.project.brand || '',
                 agencyName: deal.project.agencyName || '',
                 plannerName: deal.project.plannerName || '',
                 plannerEmail: deal.project.plannerEmail || '',
                 salesforceLink: deal.project.salesforceLink || '',
                 versionName: deal.version.name || '',
                 campaignPeriod: formatCampaignPeriod(deal.project.campaignStartDate, deal.project.campaignEndDate)
+            };
+
+            // Snapshots synced to the shared Supabase table before the
+            // account/brand rename may still carry the old brandName/
+            // subBrandName keys (external data, not touched by the local
+            // migrateToV22 migration) — normalize both shapes here, the one
+            // shared source every downstream consumer reads from.
+            const identification = {
+                ...rawIdentification,
+                account: rawIdentification.account ?? rawIdentification.brandName ?? '',
+                brand: rawIdentification.brand ?? rawIdentification.subBrandName ?? ''
             };
 
             const overallTotals = snapshot ? snapshot.overallTotals : (() => {
@@ -6535,7 +6649,7 @@
             list.innerHTML = candidates.map((c, i) => `
                 <div onclick="chooseDealMatchCandidate(${i})" style="padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='var(--background)'" onmouseout="this.style.background='white'">
                     <div style="font-weight: 600;">${escapeHtml(c.project.projectName)}</div>
-                    <div style="font-size: 0.8125rem; color: var(--text-muted);">${escapeHtml(c.project.brandName || '')}${c.project.agencyName ? ' • ' + escapeHtml(c.project.agencyName) : ''} — ${escapeHtml(c.version.name || 'Version ' + (i + 1))}</div>
+                    <div style="font-size: 0.8125rem; color: var(--text-muted);">${escapeHtml(c.project.account || '')}${c.project.agencyName ? ' • ' + escapeHtml(c.project.agencyName) : ''} — ${escapeHtml(c.version.name || 'Version ' + (i + 1))}</div>
                 </div>
             `).join('');
             window.__dealMatchCandidates = candidates;
@@ -6567,7 +6681,7 @@
             window.__dealFallbackInfo = window.__dealFallbackInfo || {};
             window.__dealFallbackInfo[deal.dealId] = {
                 projectName: id.projectName, versionName: id.versionName,
-                brandName: id.brandName, agencyName: id.agencyName
+                account: id.account, agencyName: id.agencyName
             };
 
             return `
@@ -6581,7 +6695,7 @@
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem 1rem; margin-bottom: 1.25rem; font-size: 0.8125rem;">
                         <div><strong>Project:</strong> ${escapeHtml(id.projectName)}</div>
-                        <div><strong>Brand:</strong> ${escapeHtml(id.brandName)}${id.subBrandName ? ' / ' + escapeHtml(id.subBrandName) : ''}</div>
+                        <div><strong>Account:</strong> ${escapeHtml(id.account)}${id.brand ? ' / ' + escapeHtml(id.brand) : ''}</div>
                         <div><strong>Agency:</strong> ${escapeHtml(id.agencyName)}</div>
                         <div><strong>Planner:</strong> ${escapeHtml(id.plannerName || '—')}</div>
                         <div><strong>Version:</strong> ${escapeHtml(id.versionName)}</div>
@@ -6650,8 +6764,8 @@
             const snapshot = row.snapshot || {};
             const hasRealSnapshot = !!snapshot.identification;
             const fakeProject = {
-                id: row.project_id, projectName: row.project_name, brandName: row.brand_name,
-                subBrandName: row.sub_brand_name, agencyName: row.agency_name, dealCategory: row.deal_category || null,
+                id: row.project_id, projectName: row.project_name, account: row.brand_name,
+                brand: row.sub_brand_name, agencyName: row.agency_name, dealCategory: row.deal_category || null,
                 tentpoleShowName: row.tentpole_show_name || null
             };
             const fakeVersion = {
@@ -6728,12 +6842,12 @@
             }
 
             // Filter options, built from the full (unfiltered) list
-            const brands = [...new Set(allDeals.map(d => d.project.brandName).filter(Boolean))].sort();
+            const accounts = [...new Set(allDeals.map(d => d.project.account).filter(Boolean))].sort();
             const agencies = [...new Set(allDeals.map(d => d.project.agencyName).filter(Boolean))].sort();
             const tentpoleShowNames = [...new Set(allDeals.map(d => getProjectTentpoleShowDisplayName(d.project)).filter(Boolean))].sort();
 
             const deals = allDeals.filter(d => {
-                if (closedDealsFilters.brand && d.project.brandName !== closedDealsFilters.brand) return false;
+                if (closedDealsFilters.account && d.project.account !== closedDealsFilters.account) return false;
                 if (closedDealsFilters.agency && d.project.agencyName !== closedDealsFilters.agency) return false;
                 if (closedDealsFilters.dealCategory && (d.project.dealCategory || '') !== closedDealsFilters.dealCategory) return false;
                 if (closedDealsFilters.tentpoleShow && getProjectTentpoleShowDisplayName(d.project) !== closedDealsFilters.tentpoleShow) return false;
@@ -6757,10 +6871,10 @@
                 ` : ''}
                 <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem; padding: 0.875rem 1rem; background: var(--background); border-radius: 8px; border: 1px solid var(--border);">
                     <div>
-                        <label style="display:block; font-size:0.75rem; color: var(--text-muted); margin-bottom:0.25rem;">Brand</label>
-                        <select onchange="updateClosedDealsFilter('brand', this.value)" style="padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8125rem;">
-                            <option value="">All Brands</option>
-                            ${brands.map(b => `<option value="${escapeHtml(b)}" ${closedDealsFilters.brand === b ? 'selected' : ''}>${escapeHtml(b)}</option>`).join('')}
+                        <label style="display:block; font-size:0.75rem; color: var(--text-muted); margin-bottom:0.25rem;">Account</label>
+                        <select onchange="updateClosedDealsFilter('account', this.value)" style="padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8125rem;">
+                            <option value="">All Accounts</option>
+                            ${accounts.map(a => `<option value="${escapeHtml(a)}" ${closedDealsFilters.account === a ? 'selected' : ''}>${escapeHtml(a)}</option>`).join('')}
                         </select>
                     </div>
                     <div>
@@ -6835,7 +6949,7 @@
                                 </td>
                                 <td style="padding: 0.6rem 0.75rem;">
                                     <div style="font-weight: 600;">${closedDealsExpandedIds.has(d.dealId) ? '▼' : '▶'} ${escapeHtml(d.project.projectName || '')}</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted); padding-left: 1.1rem;">${escapeHtml(d.project.brandName || '')}${d.project.agencyName ? ' • ' + escapeHtml(d.project.agencyName) : ''}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); padding-left: 1.1rem;">${escapeHtml(d.project.account || '')}${d.project.agencyName ? ' • ' + escapeHtml(d.project.agencyName) : ''}</div>
                                 </td>
                                 <td style="padding: 0.6rem 0.75rem;">${escapeHtml(d.version.name || '')}</td>
                                 <td style="padding: 0.6rem 0.75rem;">${dealStatusBadgeHTML(d.version)}</td>
@@ -6859,7 +6973,7 @@
         }
 
         function clearClosedDealsFilters() {
-            closedDealsFilters = { brand: '', agency: '', dateFrom: '', dateTo: '', dealCategory: '', dealStatus: '', tentpoleShow: '' };
+            closedDealsFilters = { account: '', agency: '', dateFrom: '', dateTo: '', dealCategory: '', dealStatus: '', tentpoleShow: '' };
             rerenderClosedDealsFromCache();
         }
 
@@ -6884,7 +6998,7 @@
         function selectAllVisibleClosedDeals() {
             const allDeals = cachedClosedDeals !== null ? cachedClosedDeals : collectAllTrackedDeals();
             const deals = allDeals.filter(d => {
-                if (closedDealsFilters.brand && d.project.brandName !== closedDealsFilters.brand) return false;
+                if (closedDealsFilters.account && d.project.account !== closedDealsFilters.account) return false;
                 if (closedDealsFilters.agency && d.project.agencyName !== closedDealsFilters.agency) return false;
                 if (closedDealsFilters.dealCategory && (d.project.dealCategory || '') !== closedDealsFilters.dealCategory) return false;
                 if (closedDealsFilters.tentpoleShow && getProjectTentpoleShowDisplayName(d.project) !== closedDealsFilters.tentpoleShow) return false;
@@ -6932,7 +7046,7 @@
         function aggregateClosedDeals(mode) {
             const allDeals = cachedClosedDeals !== null ? cachedClosedDeals : collectAllTrackedDeals();
             const filtered = allDeals.filter(d => {
-                if (closedDealsFilters.brand && d.project.brandName !== closedDealsFilters.brand) return false;
+                if (closedDealsFilters.account && d.project.account !== closedDealsFilters.account) return false;
                 if (closedDealsFilters.agency && d.project.agencyName !== closedDealsFilters.agency) return false;
                 if (closedDealsFilters.dealCategory && (d.project.dealCategory || '') !== closedDealsFilters.dealCategory) return false;
                 if (closedDealsFilters.tentpoleShow && getProjectTentpoleShowDisplayName(d.project) !== closedDealsFilters.tentpoleShow) return false;
@@ -7020,8 +7134,8 @@
 
                 return [
                     { value: id.projectName || '' },
-                    { value: id.brandName || '' },
-                    { value: id.subBrandName || '' },
+                    { value: id.account || '' },
+                    { value: id.brand || '' },
                     { value: id.agencyName || '' },
                     { value: id.plannerName || '' },
                     { value: id.plannerEmail || '' },
@@ -7114,7 +7228,7 @@
             }
 
             const headerRow = [
-                'Project', 'Brand', 'Sub-Brand', 'Agency', 'Planner Name', 'Planner Email', 'Salesforce Link', 'Campaign Period',
+                'Project', 'Account', 'Brand', 'Agency', 'Planner Name', 'Planner Email', 'Salesforce Link', 'Campaign Period',
                 'Version', 'Deal Category', 'Show / Tentpole', 'Deal Status', 'Data Source', 'Verified By', 'Verified At', 'Verification Notes',
                 'Total Investment', 'Total Impressions', 'Overall CPM', 'Total Views', 'Overall CPV', 'Total Cost', 'Margin ($)', 'Margin (%)',
                 'Added Value Cost (tracked separately, not in Total Cost/Margin)', 'Added Value Notional Value',
@@ -11550,7 +11664,7 @@
                     const importedProject = migrateData({ projects: [importedData] }).projects[0];
                     
                     // Validate the imported data has required fields
-                    if (!importedProject.projectName || !importedProject.agencyName || !importedProject.brandName) {
+                    if (!importedProject.projectName || !importedProject.agencyName || !importedProject.account) {
                         customAlert('Invalid project file: Missing required fields');
                         return;
                     }
@@ -11642,7 +11756,7 @@
                         const importedProject = migrateData({ projects: [importedData] }).projects[0];
                         
                         // Validate the imported data has required fields
-                        if (!importedProject.projectName || !importedProject.agencyName || !importedProject.brandName) {
+                        if (!importedProject.projectName || !importedProject.agencyName || !importedProject.account) {
                             customAlert('Invalid project file: Missing required fields');
                             return;
                         }
@@ -11833,8 +11947,8 @@
                 <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid var(--border);">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr><td style="padding: 0.5rem; font-weight: bold; width: 200px;">Agency:</td><td style="padding: 0.5rem;">${currentProject?.agencyName || 'N/A'}</td></tr>
-                        <tr><td style="padding: 0.5rem; font-weight: bold;">Brand:</td><td style="padding: 0.5rem;">${currentProject?.brandName || 'N/A'}</td></tr>
-                        <tr><td style="padding: 0.5rem; font-weight: bold;">Sub-Brand:</td><td style="padding: 0.5rem;">${currentProject?.subBrandName || 'N/A'}</td></tr>
+                        <tr><td style="padding: 0.5rem; font-weight: bold;">Account:</td><td style="padding: 0.5rem;">${currentProject?.account || 'N/A'}</td></tr>
+                        <tr><td style="padding: 0.5rem; font-weight: bold;">Brand:</td><td style="padding: 0.5rem;">${currentProject?.brand || 'N/A'}</td></tr>
                         <tr><td style="padding: 0.5rem; font-weight: bold;">Project:</td><td style="padding: 0.5rem;">${currentProject?.projectName || 'N/A'}</td></tr>
                         <tr><td style="padding: 0.5rem; font-weight: bold;">Version:</td><td style="padding: 0.5rem;">${currentVersion?.name || 'N/A'}</td></tr>
                         <tr><td style="padding: 0.5rem; font-weight: bold;">Campaign Period:</td><td style="padding: 0.5rem;">${formatCampaignPeriod(currentProject?.campaignStartDate, currentProject?.campaignEndDate)}</td></tr>
@@ -12869,8 +12983,8 @@
             doc.setTextColor(100, 100, 100);
             const projectInfo = [
                 ['Agency:', currentProject?.agencyName || 'N/A'],
-                ['Brand:', currentProject?.brandName || 'N/A'],
-                ['Sub-Brand:', currentProject?.subBrandName || 'N/A'],
+                ['Account:', currentProject?.account || 'N/A'],
+                ['Brand:', currentProject?.brand || 'N/A'],
                 ['Project:', currentProject?.projectName || 'N/A'],
                 ['Version:', currentVersion?.name || 'N/A'],
                 ['Campaign Period:', formatCampaignPeriod(currentProject?.campaignStartDate, currentProject?.campaignEndDate)]
@@ -13963,8 +14077,8 @@
                 summaryData.push(['MEDIA PLAN SUMMARY']);
                 summaryData.push([]);
                 summaryData.push(['Agency:', currentProject.agencyName || 'N/A']);
-                summaryData.push(['Brand:', currentProject.brandName || 'N/A']);
-                summaryData.push(['Sub-Brand:', currentProject.subBrandName || 'N/A']);
+                summaryData.push(['Account:', currentProject.account || 'N/A']);
+                summaryData.push(['Brand:', currentProject.brand || 'N/A']);
                 summaryData.push(['Project:', currentProject.projectName || 'N/A']);
                 summaryData.push(['Version:', currentVersion.name || 'N/A']);
                 summaryData.push(['Campaign Period:', formatCampaignPeriod(currentProject.campaignStartDate, currentProject.campaignEndDate)]);
