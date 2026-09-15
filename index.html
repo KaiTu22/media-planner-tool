@@ -1649,10 +1649,14 @@
                      leaving the app. Links (confirmed 2026-09-10) cover
                      something that already lives elsewhere (a client's
                      shared deck, a WeTransfer link) without downloading and
-                     re-uploading it just to have it show up in this list. -->
-                <div style="margin-bottom: 1.25rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 8px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
-                        <strong style="font-size: 0.85rem;">Project Files</strong>
+                     re-uploading it just to have it show up in this list.
+                     Collapsed by default (confirmed 2026-09-15) — it was
+                     taking up too much room on a screen most people only
+                     need to glance at; a native <details> disclosure needs
+                     no JS to expand/collapse. -->
+                <details style="margin-bottom: 1.25rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 8px;">
+                    <summary style="font-size: 0.85rem; font-weight: 700; cursor: pointer;">Project Files</summary>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <input type="file" id="projectFileInput" style="font-size: 0.8rem;">
                             <button class="btn-secondary btn-sm" onclick="uploadProjectFileAttachment()">Upload</button>
@@ -1665,7 +1669,7 @@
                         <button class="btn-secondary btn-sm" onclick="addProjectFileLink()">Add Link</button>
                     </div>
                     <ul id="projectFileList" style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.85rem;"></ul>
-                </div>
+                </details>
 
                 <div style="margin-bottom: 0.75rem;">
                     <div style="position: relative;">
