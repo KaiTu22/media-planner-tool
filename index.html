@@ -3064,7 +3064,7 @@
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
                 <span id="supabaseSyncIndicator" style="display: none; align-items: center; gap: 0.4rem; font-size: 0.8125rem; color: #92400E; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 6px; padding: 0.4rem 0.75rem;">
                     ⏳ <span class="sync-count">0</span> deal(s) not yet synced to the shared list
-                    <button class="btn-secondary btn-sm" onclick="retryPendingSupabaseSyncs().then(() => renderClosedDealsList())" style="margin-left: 0.25rem;">Retry Now</button>
+                    <button class="btn-secondary btn-sm" onclick="retryPendingSupabaseSyncs().then(() => renderClosedDealsList()); retryPendingClosedDealBackendSyncs();" style="margin-left: 0.25rem;">Retry Now</button>
                 </span>
                 <button class="btn-primary" onclick="exportClosedDeals()">📊 Export Closed Deals to Excel</button>
             </div>
@@ -4506,6 +4506,7 @@
             initializeInputFormatting();
             updateSupabaseSyncIndicator();
             retryPendingSupabaseSyncs(); // pick up anything left unsynced from a previous session
+            retryPendingClosedDealBackendSyncs();
             retryPendingBackendSyncs(); // pick up anything left unsynced from a previous session
             pullAssignedProjects().then(async function () { // fire and forget — pick up new Assignment-created projects
                 if (IS_EMBEDDED && DEEP_LINK_PROJECT_ID) {
@@ -5317,7 +5318,7 @@
                         // otherwise a deleted deal would keep showing up for
                         // everyone else, orphaned in the shared table.
                         trackedVersions.forEach(v => {
-                            deleteDealFromSupabase(`${project.id}::${v.id}`);
+                            deleteClosedDealEverywhere(`${project.id}::${v.id}`);
                             clearDealPendingSync(`${project.id}::${v.id}`);
                         });
                         projects.splice(index, 1);
@@ -5694,7 +5695,7 @@
             (project.versions || []).forEach(version => {
                 if (!version.dealStatus) return;
                 const overall = calculateOverallTotals(version.packages || []);
-                syncDealToSupabase({
+                syncClosedDealEverywhere({
                     dealId: `${project.id}::${version.id}`,
                     project, version,
                     totalInvestment: overall.totalPrice,
@@ -5747,7 +5748,7 @@
             (project.versions || []).forEach(version => {
                 if (!version.dealStatus) return;
                 const overall = calculateOverallTotals(version.packages || []);
-                syncDealToSupabase({
+                syncClosedDealEverywhere({
                     dealId: `${project.id}::${version.id}`,
                     project, version,
                     totalInvestment: overall.totalPrice,
@@ -5823,7 +5824,7 @@
 
                     const dealId = `${project.id}::${version.id}`;
                     const overall = calculateOverallTotals(version.packages || []);
-                    syncDealToSupabase({
+                    syncClosedDealEverywhere({
                         dealId, project, version,
                         totalInvestment: overall.totalPrice,
                         marginPercent: overall.totalMarginPercent
@@ -5848,7 +5849,7 @@
 
                     const dealId = `${project.id}::${version.id}`;
                     const overall = calculateOverallTotals(version.packages || []);
-                    syncDealToSupabase({
+                    syncClosedDealEverywhere({
                         dealId, project, version,
                         totalInvestment: overall.totalPrice,
                         marginPercent: overall.totalMarginPercent
@@ -5879,7 +5880,7 @@
                     flushBackendSync(project); // one-time action — sync now, don't wait on the debounce
 
                     const dealId = `${project.id}::${version.id}`;
-                    deleteDealFromSupabase(dealId).then(success => {
+                    deleteClosedDealEverywhere(dealId).then(success => {
                         clearDealPendingSync(dealId);
                         if (!success) {
                             customAlert('Removed locally, but couldn\'t remove this deal from the shared Closed Deals table — it may still appear there for you and others until this is resolved. This usually means a permissions issue on the shared database rather than something wrong with your data.');
@@ -6060,6 +6061,93 @@
                 console.error('Could not delete shared record from Supabase (will remain until manually removed):', e);
                 return false;
             }
+        }
+
+        // ====================================================================
+        // SHARED CLOSED DEAL STORAGE — Sheets/Apps Script backend (dual-write)
+        // ====================================================================
+        // Added 2026-09-16 alongside the Supabase sync above, not in place of
+        // it — the standalone Deal-Dashboard reads directly from Supabase and
+        // may still be in active use, so that path stays fully untouched here.
+        // This writes the same row (buildSupabaseDealRow already produces the
+        // exact shape both destinations need — its field names were chosen to
+        // match Supabase's, and the new ClosedDeals sheet reuses them) to the
+        // new backend too, via the same backendPost/backendJsonpRequest
+        // helpers already used for Project/Version sync. Once the new
+        // Reporting page (reading from this same backend) is confirmed as a
+        // full replacement, retiring the Supabase path is a separate,
+        // deliberate follow-up — not done here.
+        function getPendingClosedDealBackendSyncs() {
+            try { return JSON.parse(localStorage.getItem('mediaPlanner_pendingClosedDealBackendSyncs') || '[]'); }
+            catch (e) { return []; }
+        }
+        function setPendingClosedDealBackendSyncs(dealIds) {
+            localStorage.setItem('mediaPlanner_pendingClosedDealBackendSyncs', JSON.stringify(dealIds));
+        }
+        function markClosedDealPendingBackendSync(dealId) {
+            const pending = getPendingClosedDealBackendSyncs();
+            if (!pending.includes(dealId)) {
+                pending.push(dealId);
+                setPendingClosedDealBackendSyncs(pending);
+            }
+        }
+        function clearClosedDealPendingBackendSync(dealId) {
+            setPendingClosedDealBackendSyncs(getPendingClosedDealBackendSyncs().filter(id => id !== dealId));
+        }
+
+        // Pushes one deal to the new backend in the background. backendPost()
+        // never rejects (the iframe response is unreadable — see its own
+        // comment), so this follows up with one read to confirm the row
+        // actually landed before clearing the pending flag — a bit more
+        // rigorous than syncProjectToBackend's unverified trust, justified
+        // since this data feeds executive reporting.
+        async function syncClosedDealToBackend(deal) {
+            const dealId = deal.dealId;
+            const row = buildSupabaseDealRow(deal);
+            try {
+                await backendPost({ action: 'upsertClosedDeal', payload: JSON.stringify(row) });
+                const rows = await backendJsonpRequest({ action: 'listClosedDeals' });
+                const landed = rows.some(r => r.deal_id === dealId && r.updated_at === row.updated_at);
+                if (landed) {
+                    clearClosedDealPendingBackendSync(dealId);
+                    return true;
+                }
+            } catch (e) {
+                console.error('Could not verify closed deal backend sync:', e);
+            }
+            markClosedDealPendingBackendSync(dealId);
+            return false;
+        }
+
+        // Best-effort, same philosophy as deleteDealFromSupabase — no retry
+        // queue for deletes (a stale row left behind is a minor cosmetic gap,
+        // not a data-loss risk).
+        async function deleteClosedDealFromBackend(dealId) {
+            await backendPost({ action: 'deleteClosedDeal', payload: JSON.stringify({ deal_id: dealId }) });
+        }
+
+        async function retryPendingClosedDealBackendSyncs() {
+            const pending = getPendingClosedDealBackendSyncs();
+            if (pending.length === 0) return;
+            const allDeals = collectAllTrackedDeals();
+            for (const dealId of pending) {
+                const deal = allDeals.find(d => d.dealId === dealId);
+                if (deal) await syncClosedDealToBackend(deal);
+            }
+        }
+
+        // Call sites only need to call these two — each triggers both the
+        // existing Supabase path and the new backend path. deleteClosedDealEverywhere
+        // preserves deleteDealFromSupabase's existing return-value contract
+        // (used by unmarkVersionClosed to show a user-facing warning) while
+        // also firing the new backend delete alongside, uncoupled from it.
+        function syncClosedDealEverywhere(deal) {
+            syncDealToSupabase(deal);
+            syncClosedDealToBackend(deal);
+        }
+        function deleteClosedDealEverywhere(dealId) {
+            deleteClosedDealFromBackend(dealId);
+            return deleteDealFromSupabase(dealId);
         }
 
         function updateSupabaseSyncIndicator() {
@@ -6268,7 +6356,7 @@
             // Local save is done — now sync to the shared table in the
             // background. Never blocks the UI; queued for retry if it fails.
             const dealId = `${project.id}::${version.id}`;
-            syncDealToSupabase({
+            syncClosedDealEverywhere({
                 dealId, project, version,
                 totalInvestment: version.dealSnapshot.overallTotals.totalInvestment,
                 marginPercent: version.dealSnapshot.overallTotals.totalMarginPercent
@@ -6290,7 +6378,7 @@
                 // version is currently being edited.
                 if (typeof currentProject !== 'undefined' && currentProject) {
                     const overall = calculateOverallTotals(version.packages || []);
-                    syncDealToSupabase({
+                    syncClosedDealEverywhere({
                         dealId: `${currentProject.id}::${version.id}`,
                         project: currentProject, version,
                         totalInvestment: overall.totalPrice,
@@ -6820,6 +6908,7 @@
             container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading shared Closed Deals...</div>`;
 
             retryPendingSupabaseSyncs(); // fire and forget, don't block the render below
+            retryPendingClosedDealBackendSyncs();
 
             const sharedRows = await fetchSharedClosedDeals();
             if (sharedRows !== null) {
@@ -7386,7 +7475,7 @@
                 (confirmed) => {
                     if (confirmed) {
                         if (version.dealStatus) {
-                            deleteDealFromSupabase(`${project.id}::${version.id}`);
+                            deleteClosedDealEverywhere(`${project.id}::${version.id}`);
                             clearDealPendingSync(`${project.id}::${version.id}`);
                         }
                         currentProject.versions.splice(index, 1);
