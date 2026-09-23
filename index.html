@@ -1458,6 +1458,7 @@
         <button class="tab active" onclick="switchTab('planner')">Media Planner</button>
         <button class="tab" onclick="switchTab('closeddeals')">Closed Deals</button>
         <button class="tab" onclick="switchTab('tools')">Tools</button>
+        <button class="tab" onclick="switchTab('sponsorshiphub')">Sponsorship Hub</button>
     </div>
 
     <div class="container">
@@ -3555,6 +3556,80 @@
             </div>
         </div>
         <!-- End of Tools Section -->
+
+        <!-- Sponsorship Hub Section -->
+        <div id="sponsorshiphub-section" class="tab-content">
+            <div id="hub-list-screen">
+                <div style="text-align: center; padding: 0.65rem 0;">
+                    <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; color: var(--primary); font-size: 2rem; margin-bottom: 0.5rem;">Sponsorship Hub</h2>
+                    <p style="color: var(--text-muted); font-size: 1rem;">Pre-built sponsorship packages, ready to attach to a project</p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; flex-wrap: wrap;">
+                    <select id="hubShowFilter" onchange="renderHubPackagesList()" style="max-width: 260px;">
+                        <option value="">All Shows / Franchises</option>
+                    </select>
+                    <button class="btn-primary" onclick="showNewSponsorshipPackageForm()">+ New Package</button>
+                </div>
+
+                <div id="hubPackagesList"></div>
+            </div>
+
+            <div id="hub-builder-screen" style="display: none;">
+                <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+                    <h2 id="hubBuilderTitle" style="font-family:'PeakSans', sans-serif;font-weight:600;">New Sponsorship Package</h2>
+                    <button class="btn-secondary btn-sm" onclick="backToSponsorshipHubList()">&larr; Back to Hub</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Package Name <span class="required">*</span></label>
+                    <input type="text" id="hubPackageName" placeholder="e.g., 10% SOV Co-Presenting">
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Show / Franchise <span class="required">*</span></label>
+                        <select id="hubPackageShow" onchange="onHubShowChange()">
+                            <option value="">Select a show...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Season / Year <span class="required">*</span></label>
+                        <select id="hubPackageSeasonYear">
+                            <option value="">Select a show first...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="hubPackageStatus">
+                        <option value="active">Active</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+
+                <div class="section-header">Placements</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Platform</th><th>Description</th><th>Size</th><th>Flight</th>
+                                <th>Cost Method</th><th>Rate</th><th>Qty</th><th>Net Cost</th><th>AV?</th><th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="hubPlacementsBody"></tbody>
+                    </table>
+                </div>
+                <button class="btn-secondary btn-sm" onclick="addHubPlacementRow()" style="margin-top:0.5rem;">+ Add Placement</button>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="backToSponsorshipHubList()">Cancel</button>
+                    <button class="btn-primary" onclick="saveSponsorshipPackage()">Save Package</button>
+                </div>
+            </div>
+        </div>
+        <!-- End of Sponsorship Hub Section -->
     </div>
 
     <!-- Custom Confirmation Dialog -->
@@ -4049,6 +4124,13 @@
         const IS_EMBEDDED = urlParams.get('embedded') === '1';
         const DEEP_LINK_PROJECT_ID = urlParams.get('projectId');
 
+        // A second, project-independent embedded entry point (confirmed
+        // 2026-09-23) — the Sponsorship Hub's catalog is built and browsed
+        // with no specific project in context, so it's reachable straight
+        // from the app shell's own top-level nav (Log, Reporting, etc.)
+        // rather than requiring a project to be opened first.
+        const VIEW_PARAM = urlParams.get('view');
+
         function applyEmbeddedMode() {
             const header = document.getElementById('appHeader');
             const tabs = document.getElementById('mainTabs');
@@ -4512,7 +4594,11 @@
         window.onload = function() {
             loadProjects();
             if (IS_EMBEDDED) applyEmbeddedMode();
-            if (IS_EMBEDDED && DEEP_LINK_PROJECT_ID) {
+            if (IS_EMBEDDED && VIEW_PARAM === 'sponsorshiphub') {
+                // Project-independent entry point — no project list, no
+                // deep-link resolution, straight to the Hub's own tab.
+                switchTab('sponsorshiphub');
+            } else if (IS_EMBEDDED && DEEP_LINK_PROJECT_ID) {
                 // Skip screen-0 entirely — avoid a flash of the tool's own
                 // project list when the Assignment Log (in the parent
                 // shell) already told us exactly which project to open.
@@ -14695,9 +14781,16 @@
             // Normal path: called from a real onclick, so the global `event`
             // refers to the click and event.target is the button itself.
             // Fallback: called programmatically (e.g. navigating here from
-            // the Closed Deals view) — no click event exists, so find the
-            // matching button by its onclick attribute instead of crashing.
-            if (typeof event !== 'undefined' && event && event.target) {
+            // the Closed Deals view, or from window.onload's Sponsorship Hub
+            // deep entry) — no click event exists, so find the matching
+            // button by its onclick attribute instead of crashing. Checking
+            // event.type === 'click' (not just event.target) matters here:
+            // window.onload's own Event is also a non-null global `event`
+            // with a `.target` (document/window), which isn't a button and
+            // has no .classList — a programmatic call during page load hits
+            // that case, not the "no event at all" case the comment above
+            // originally assumed.
+            if (typeof event !== 'undefined' && event && event.type === 'click' && event.target) {
                 event.target.classList.add('active');
             } else {
                 const btn = Array.from(document.querySelectorAll('.tab')).find(t => (t.getAttribute('onclick') || '').includes(`'${tabName}'`));
@@ -14715,6 +14808,243 @@
             if (tabName === 'closeddeals') {
                 renderClosedDealsList();
             }
+            if (tabName === 'sponsorshiphub') {
+                renderSponsorshipHubList();
+            }
+        }
+
+        // ─── Sponsorship Hub ────────────────────────────────────────────────
+        // First pass (confirmed 2026-09-23): core catalog CRUD + a
+        // straightforward placements table. Blend groups and section
+        // headers (both part of the agreed schema) aren't in this pass yet —
+        // placements is still a plain array either way, so adding them later
+        // is additive, not a reshape.
+        let hubShows = [];
+        let hubSeasonYears = [];
+        let hubPackages = [];
+        let hubEditingPackageId = null;
+        let hubPlacements = [];
+
+        async function waitForBackendCondition(checkFn, tries, delayMs) {
+            tries = tries || 10;
+            delayMs = delayMs || 400;
+            for (let i = 0; i < tries; i++) {
+                if (await checkFn()) return true;
+                await new Promise(r => setTimeout(r, delayMs));
+            }
+            return false;
+        }
+
+        async function renderSponsorshipHubList() {
+            const listEl = document.getElementById('hubPackagesList');
+            listEl.innerHTML = '<div class="empty-state">Loading…</div>';
+            try {
+                const [shows, seasonYears, packages] = await Promise.all([
+                    backendJsonpRequest({ action: 'listTentpoleShows' }),
+                    backendJsonpRequest({ action: 'listSeasonYears' }),
+                    backendJsonpRequest({ action: 'listSponsorshipPackages' }),
+                ]);
+                hubShows = shows;
+                hubSeasonYears = seasonYears;
+                hubPackages = packages;
+            } catch (err) {
+                listEl.innerHTML = `<div class="empty-state">Could not load the Sponsorship Hub: ${escapeHtml(err.message)}</div>`;
+                return;
+            }
+
+            const filterSelect = document.getElementById('hubShowFilter');
+            const currentFilter = filterSelect.value;
+            filterSelect.innerHTML = '<option value="">All Shows / Franchises</option>' +
+                hubShows.map(s => `<option value="${s.id}" ${s.id === currentFilter ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('');
+
+            renderHubPackagesList();
+        }
+
+        function getHubShowName(id) {
+            const show = hubShows.find(s => s.id === id);
+            return show ? show.name : 'Unknown Show';
+        }
+        function getHubSeasonYearName(id) {
+            const seasonYear = hubSeasonYears.find(s => s.id === id);
+            return seasonYear ? seasonYear.name : '';
+        }
+
+        function renderHubPackagesList() {
+            const filter = document.getElementById('hubShowFilter').value;
+            const filtered = filter ? hubPackages.filter(p => p.showId === filter) : hubPackages;
+            const container = document.getElementById('hubPackagesList');
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state">No sponsorship packages yet. Click "+ New Package" to build your first one.</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(pkg => {
+                const placementCount = (pkg.placements || []).length;
+                const isArchived = pkg.status === 'archived';
+                return `
+                    <div class="package-card">
+                        <div class="package-header">
+                            <div>
+                                <div class="package-title">${escapeHtml(pkg.name || 'Untitled Package')}</div>
+                                <div style="font-size:0.85rem;color:var(--text-muted);font-family:'Inter',sans-serif;text-transform:none;">
+                                    ${escapeHtml(getHubShowName(pkg.showId))} &middot; ${escapeHtml(getHubSeasonYearName(pkg.seasonYearId))} &middot; ${placementCount} placement${placementCount === 1 ? '' : 's'}
+                                </div>
+                            </div>
+                            <span class="badge ${isArchived ? '' : 'badge-success'}">${escapeHtml(pkg.status || 'active')}</span>
+                        </div>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button class="btn-secondary btn-sm" onclick="editSponsorshipPackage('${pkg.id}')">Edit</button>
+                            <button class="btn-danger btn-sm" onclick="deleteSponsorshipPackageConfirm('${pkg.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHubShowSelect() {
+            const select = document.getElementById('hubPackageShow');
+            select.innerHTML = '<option value="">Select a show...</option>' +
+                hubShows.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+        }
+
+        // A season/year only means something under a specific show (same
+        // reasoning as the Assignment form's cascading selector), so
+        // switching shows resets whichever season/year was picked.
+        function onHubShowChange() {
+            const showId = document.getElementById('hubPackageShow').value;
+            const select = document.getElementById('hubPackageSeasonYear');
+            const options = hubSeasonYears.filter(sy => sy.showId === showId);
+            select.innerHTML = (showId ? '<option value="">Select a season/year...</option>' : '<option value="">Select a show first...</option>') +
+                options.map(sy => `<option value="${sy.id}">${escapeHtml(sy.name)}</option>`).join('');
+        }
+
+        function showNewSponsorshipPackageForm() {
+            hubEditingPackageId = null;
+            hubPlacements = [];
+            document.getElementById('hubBuilderTitle').textContent = 'New Sponsorship Package';
+            document.getElementById('hubPackageName').value = '';
+            document.getElementById('hubPackageStatus').value = 'active';
+            renderHubShowSelect();
+            document.getElementById('hubPackageShow').value = '';
+            onHubShowChange();
+            renderHubPlacementsTable();
+            document.getElementById('hub-list-screen').style.display = 'none';
+            document.getElementById('hub-builder-screen').style.display = 'block';
+        }
+
+        function editSponsorshipPackage(id) {
+            const pkg = hubPackages.find(p => p.id === id);
+            if (!pkg) return;
+            hubEditingPackageId = id;
+            hubPlacements = JSON.parse(JSON.stringify(pkg.placements || []));
+            document.getElementById('hubBuilderTitle').textContent = 'Edit Sponsorship Package';
+            document.getElementById('hubPackageName').value = pkg.name || '';
+            document.getElementById('hubPackageStatus').value = pkg.status || 'active';
+            renderHubShowSelect();
+            document.getElementById('hubPackageShow').value = pkg.showId || '';
+            onHubShowChange();
+            document.getElementById('hubPackageSeasonYear').value = pkg.seasonYearId || '';
+            renderHubPlacementsTable();
+            document.getElementById('hub-list-screen').style.display = 'none';
+            document.getElementById('hub-builder-screen').style.display = 'block';
+        }
+
+        function backToSponsorshipHubList() {
+            document.getElementById('hub-builder-screen').style.display = 'none';
+            document.getElementById('hub-list-screen').style.display = 'block';
+            renderSponsorshipHubList(); // re-fetch, not just re-render — hubPackages is stale after a save
+        }
+
+        function addHubPlacementRow() {
+            hubPlacements.push({
+                platform: '', description: '', size: '', flight: '',
+                costMethod: 'CPM', rate: '', quantity: '', netCost: '', isAddedValue: false,
+            });
+            renderHubPlacementsTable();
+        }
+
+        function removeHubPlacementRow(idx) {
+            hubPlacements.splice(idx, 1);
+            renderHubPlacementsTable();
+        }
+
+        function updateHubPlacementField(idx, field, rawValue) {
+            const value = field === 'isAddedValue' ? rawValue : rawValue;
+            hubPlacements[idx][field] = value;
+            if (field === 'costMethod' || field === 'rate' || field === 'quantity') {
+                const p = hubPlacements[idx];
+                if (p.costMethod === 'CPM' && p.rate && p.quantity) {
+                    p.netCost = (parseFloat(p.rate) * parseFloat(p.quantity) / 1000).toFixed(2);
+                    renderHubPlacementsTable();
+                }
+            }
+        }
+
+        function renderHubPlacementsTable() {
+            const tbody = document.getElementById('hubPlacementsBody');
+            if (hubPlacements.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);">No placements yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = hubPlacements.map((p, idx) => `
+                <tr>
+                    <td><input type="text" value="${escapeHtml(p.platform)}" oninput="updateHubPlacementField(${idx}, 'platform', this.value)" style="width:110px;"></td>
+                    <td><input type="text" value="${escapeHtml(p.description)}" oninput="updateHubPlacementField(${idx}, 'description', this.value)" style="width:160px;"></td>
+                    <td><input type="text" value="${escapeHtml(p.size)}" oninput="updateHubPlacementField(${idx}, 'size', this.value)" style="width:90px;"></td>
+                    <td><input type="text" value="${escapeHtml(p.flight)}" oninput="updateHubPlacementField(${idx}, 'flight', this.value)" style="width:90px;"></td>
+                    <td>
+                        <select onchange="updateHubPlacementField(${idx}, 'costMethod', this.value)" style="min-width:100px;">
+                            <option value="CPM" ${p.costMethod === 'CPM' ? 'selected' : ''}>CPM</option>
+                            <option value="Flat Fee" ${p.costMethod === 'Flat Fee' ? 'selected' : ''}>Flat Fee</option>
+                            <option value="AV" ${p.costMethod === 'AV' ? 'selected' : ''}>Added Value</option>
+                        </select>
+                    </td>
+                    <td><input type="number" value="${p.rate}" oninput="updateHubPlacementField(${idx}, 'rate', this.value)" style="width:80px;"></td>
+                    <td><input type="number" value="${p.quantity}" oninput="updateHubPlacementField(${idx}, 'quantity', this.value)" style="width:80px;"></td>
+                    <td><input type="number" value="${p.netCost}" oninput="updateHubPlacementField(${idx}, 'netCost', this.value)" style="width:90px;"></td>
+                    <td style="text-align:center;"><input type="checkbox" ${p.isAddedValue ? 'checked' : ''} onchange="updateHubPlacementField(${idx}, 'isAddedValue', this.checked)"></td>
+                    <td><span class="delete-icon" onclick="removeHubPlacementRow(${idx})" title="Remove placement">✕</span></td>
+                </tr>
+            `).join('');
+        }
+
+        async function saveSponsorshipPackage() {
+            const name = document.getElementById('hubPackageName').value.trim();
+            const showId = document.getElementById('hubPackageShow').value;
+            const seasonYearId = document.getElementById('hubPackageSeasonYear').value;
+            const status = document.getElementById('hubPackageStatus').value;
+
+            if (!name || !showId || !seasonYearId) {
+                customAlert('Package Name, Show, and Season/Year are all required.');
+                return;
+            }
+
+            const id = hubEditingPackageId || ('sponsorship-' + generateId());
+            const isNew = !hubEditingPackageId;
+            const payload = { id, name, showId, seasonYearId, status, placements: hubPlacements };
+
+            await backendPost({
+                action: isNew ? 'createSponsorshipPackage' : 'updateSponsorshipPackage',
+                payload: JSON.stringify(payload),
+            });
+            await waitForBackendCondition(async () => {
+                const rows = await backendJsonpRequest({ action: 'listSponsorshipPackages' });
+                return rows.some(r => r.id === id && r.name === name);
+            });
+            backToSponsorshipHubList();
+        }
+
+        function deleteSponsorshipPackageConfirm(id) {
+            const pkg = hubPackages.find(p => p.id === id);
+            showConfirm(`Delete "${pkg ? pkg.name : 'this package'}"? This cannot be undone.`, async () => {
+                await backendPost({ action: 'deleteSponsorshipPackage', payload: JSON.stringify({ id }) });
+                await waitForBackendCondition(async () => {
+                    const rows = await backendJsonpRequest({ action: 'listSponsorshipPackages' });
+                    return !rows.some(r => r.id === id);
+                });
+                renderSponsorshipHubList();
+            });
         }
 
         // Tool Navigation
