@@ -240,7 +240,7 @@
         .container {
             max-width: 1200px;  /* Reduced from 1400px for 13" screens */
             margin: 0 auto;
-            padding: 0.75rem 1rem;  /* Reduced vertical padding */
+            padding: 0.5rem 0.75rem;  /* Reduced vertical padding */
         }
 
         .screen {
@@ -257,6 +257,10 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .card {
             /* Softer, deeper card treatment (confirmed 2026-09-09) matching
                the new media-planner-app shell — larger radius, layered
@@ -264,7 +268,7 @@
                double-shadow, warm-tinted rather than pure black. */
             background: linear-gradient(180deg, #FFFFFF 0%, var(--background-subtle) 100%);
             border-radius: 18px;
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.75rem;
             box-shadow:
                 0 1px 0 rgba(255, 255, 255, 0.9) inset,
                 0 1px 3px rgba(43, 38, 32, 0.06),
@@ -283,8 +287,8 @@
         }
 
         .card-header {
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
+            margin-bottom: 0.6rem;  /* Density pass (confirmed 2026-09-23) */
+            padding-bottom: 0.5rem;
             border-bottom: 2px solid var(--border);
         }
 
@@ -305,7 +309,7 @@
         }
 
         .form-group {
-            margin-bottom: 0.75rem;  /* Ultra-compact */
+            margin-bottom: 0.5rem;  /* Density pass (confirmed 2026-09-23, matching media-planner-app's Log) — this compounds fast across stacked form fields, so it's the highest-leverage single tighten in the file. */
         }
 
         label {
@@ -412,14 +416,14 @@
         .checkbox-group {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.5rem;  /* Density pass (confirmed 2026-09-23) */
         }
 
         .radio-option,
         .checkbox-option {
             display: flex;
             align-items: center;
-            padding: 1rem;
+            padding: 0.6rem 0.75rem;  /* Density pass (confirmed 2026-09-23) — was 1rem all around */
             border: 1.5px solid var(--border);
             border-radius: 8px;
             cursor: pointer;
@@ -452,14 +456,14 @@
         .button-group {
             display: flex;
             gap: 0.5rem;
-            padding: 1rem;
+            padding: 0.6rem 1rem;  /* Density pass (confirmed 2026-09-23) */
             background: white;
             border-top: 2px solid var(--border);
             box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
             position: sticky;
             bottom: 0;
             z-index: 100;
-            margin-top: 2rem;
+            margin-top: 0.6rem;
         }
 
         button {
@@ -597,8 +601,8 @@
             color: var(--text-primary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin: 1.5rem 0 1rem;
-            padding-bottom: 0.75rem;
+            margin: 1rem 0 0.6rem;  /* Density pass (confirmed 2026-09-23) */
+            padding-bottom: 0.5rem;
             border-bottom: 3px solid var(--accent);
             display: flex;
             align-items: center;
@@ -671,8 +675,8 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 0.75rem 1rem;  /* Ultra-compact */
-            margin-bottom: 1rem;  /* Ultra-compact */
+            padding: 0.5rem 0.75rem;  /* Density pass (confirmed 2026-09-23) */
+            margin-bottom: 0.6rem;
         }
 
         .progress-steps {
@@ -725,7 +729,7 @@
 
         .table-container {
             overflow-x: auto;
-            margin: 1.5rem 0;
+            margin: 0.75rem 0;  /* Density pass (confirmed 2026-09-23) */
         }
         
         /* Breadcrumb Navigation */
@@ -734,7 +738,7 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.75rem 0;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             font-size: 0.875rem;
             color: var(--text-muted);
         }
@@ -785,7 +789,7 @@
         }
 
         td {
-            padding: 0.6rem 0.75rem;  /* Very compact */
+            padding: 0.45rem 0.75rem;  /* Density pass (confirmed 2026-09-23) — matches the Log's row height */
             border-bottom: 1px solid var(--border);
             font-size: 0.8rem;
         }
@@ -839,9 +843,9 @@
         }
 
         .alert {
-            padding: 1rem 1.25rem;
+            padding: 0.5rem 0.75rem;  /* Density pass (confirmed 2026-09-23) */
             border-radius: 8px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             font-size: 0.875rem;
             display: flex;
             align-items: start;
@@ -940,7 +944,7 @@
         .input-addon {
             background: var(--background);
             border: 1.5px solid var(--border);
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.75rem;
             border-radius: 8px;
             font-weight: 500;
             color: var(--text-muted);
@@ -950,8 +954,8 @@
             background: var(--background);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
+            padding: 0.75rem;  /* Density pass (confirmed 2026-09-23) */
+            margin-bottom: 0.6rem;
         }
 
         .platform-allocation-header {
@@ -979,8 +983,8 @@
         }
 
         .percentage-validation {
-            margin-top: 1rem;
-            padding: 0.75rem;
+            margin-top: 0.6rem;  /* Density pass (confirmed 2026-09-23) */
+            padding: 0.6rem 0.75rem;
             border-radius: 6px;
             font-size: 0.875rem;
             font-weight: 500;
@@ -1008,7 +1012,7 @@
             top: 0;
             background: white;
             border-bottom: 1px solid var(--border);
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.25rem;
             margin: -1rem -1.5rem 1rem;
             z-index: 100;
             display: flex;
@@ -1037,16 +1041,16 @@
         .column-left, .column-right {
             min-width: 0;  /* Prevent overflow */
             background: #F8FAFB;
-            padding: 1.25rem;
+            padding: 0.85rem;  /* Density pass (confirmed 2026-09-23) */
             border-radius: 8px;
             border: 1px solid #E2E8F0;
         }
-        
+
         .column-header {
             font-weight: 600;
             font-size: 0.875rem;
             color: #1e293b;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             padding-bottom: 0.5rem;
             border-bottom: 2px solid #CBD5E1;
         }
@@ -1054,13 +1058,13 @@
         @media (max-width: 1024px) {
             .two-column-layout {
                 grid-template-columns: 1fr;
-                gap: 1.5rem;
+                gap: 0.75rem;
             }
         }
 
         .empty-state-icon {
             font-size: 3rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             opacity: 0.3;
         }
 
@@ -1094,7 +1098,7 @@
         .tab {
             flex: 1;
             max-width: 200px;
-            padding: 1rem 2rem;
+            padding: 0.65rem 1.5rem;  /* Density pass (confirmed 2026-09-23) — matching the Log's much shorter, flatter nav bar */
             background: white;
             border: none;
             border-bottom: 3px solid transparent;
@@ -1129,8 +1133,8 @@
         .tools-menu {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            padding: 2rem;
+            gap: 0.75rem;
+            padding: 0.65rem;
             max-width: 1200px;
             margin: 0 auto;
         }
@@ -1139,7 +1143,7 @@
             background: white;
             border: 2px solid var(--border);
             border-radius: 12px;
-            padding: 2rem;
+            padding: 0.65rem;
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: center;
@@ -1152,7 +1156,7 @@
         }
 
         .tool-card-icon {
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -1183,7 +1187,7 @@
 
         .tool-screen {
             display: none;
-            padding: 2rem;
+            padding: 0.65rem;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -1202,7 +1206,7 @@
         .calculator-inputs,
         .calculator-outputs {
             background: white;
-            padding: 2rem;
+            padding: 0.65rem;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
@@ -1218,7 +1222,7 @@
         }
 
         .calc-input-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: 0.75rem;
         }
 
         .calc-input-group label {
@@ -1275,11 +1279,11 @@
         }
 
         .calc-output-item {
-            padding: 1rem;
+            padding: 0.65rem;
             background: var(--background);
             border-left: 4px solid var(--primary);
             border-radius: 8px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
         }
 
         .calc-output-item.highlight {
@@ -1308,14 +1312,14 @@
 
         .calc-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 0.6rem;
             margin-top: 2rem;
         }
 
         .lookup-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1.5rem;
+            margin-top: 0.85rem;
             background: white;
             border-radius: 12px;
             overflow: hidden;
@@ -1328,7 +1332,7 @@
         }
 
         .lookup-table th {
-            padding: 1rem;
+            padding: 0.65rem;
             text-align: left;
             font-weight: 700;
             font-size: 0.875rem;
@@ -1350,7 +1354,7 @@
         }
 
         .table-section-title {
-            margin: 2.5rem 0 1rem 0;
+            margin: 1rem 0 0.6rem 0;  /* Density pass (confirmed 2026-09-23) */
             color: var(--primary);
             font-size: 1.25rem;
             font-weight: 700;
@@ -1361,14 +1365,14 @@
         .radio-group {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-            margin-top: 1rem;
+            gap: 0.5rem;  /* Density pass (confirmed 2026-09-23) — this later rule was overriding the earlier .radio-group definition (same selector, later wins), so the first pass at this had no visible effect until this one was also tightened */
+            margin-top: 0.6rem;
         }
 
         .radio-option {
             display: flex;
             align-items: center;
-            padding: 1rem;
+            padding: 0.6rem 0.75rem;  /* Density pass (confirmed 2026-09-23) */
             border: 2px solid var(--border);
             border-radius: 8px;
             cursor: pointer;
@@ -1385,6 +1389,7 @@
 
         .radio-option input[type="radio"]:focus {
             box-shadow: none;
+        }
 
         .radio-option input[type="radio"] {
             margin-right: 0.75rem;
@@ -1415,7 +1420,7 @@
 
             .tools-menu {
                 grid-template-columns: 1fr;
-                padding: 1rem;
+                padding: 0.65rem;
             }
 
             .main-tabs {
@@ -1433,7 +1438,7 @@
 </head>
 <body>
     <div id="appHeader" class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 1.5rem; margin-left: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem;">
             <div style="cursor: pointer;" onclick="navigateToProjectsHome()">
                 <div style="font-family: 'ParamountVistaSans', 'Fjalla One', sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.06em; color: var(--primary); white-space: nowrap;">MEDIA PLANNER</div>
             </div>
@@ -1462,7 +1467,7 @@
         <!-- Screen 0: Project Selection / Creation -->
         <div id="screen-0" class="screen active">
             <!-- Sticky Action Bar -->
-            <div style="position: sticky; top: 0; z-index: 100; background: white; padding: 1rem 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div style="position: sticky; top: 0; z-index: 100; background: white; padding: 0.65rem 0; margin-bottom: 0.85rem; border-bottom: 2px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; padding-left: 1rem; padding-right: 1rem;">
                     <a href="https://kaitu22.github.io/media-planner-app/" target="_blank" rel="noreferrer" class="btn-secondary" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none;">&larr; Assignment / Log</a>
                     <button class="btn-secondary" onclick="importProject()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Import Project</button>
@@ -1474,7 +1479,7 @@
             </div>
             
             <!-- Drag and Drop Zone -->
-            <div id="dropZone" style="display: none; margin-bottom: 1.5rem; border: 2px dashed var(--primary); border-radius: 12px; padding: 2rem; text-align: center; background: linear-gradient(135deg, rgba(0, 40, 104, 0.02) 0%, rgba(0, 40, 104, 0.05) 100%); transition: all 0.3s ease;">
+            <div id="dropZone" style="display: none; margin-bottom: 0.85rem; border: 2px dashed var(--primary); border-radius: 12px; padding: 0.65rem; text-align: center; background: linear-gradient(135deg, rgba(0, 40, 104, 0.02) 0%, rgba(0, 40, 104, 0.05) 100%); transition: all 0.3s ease;">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem;">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17 8 12 3 7 8"></polyline>
@@ -1563,30 +1568,30 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.6rem;">
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Planner Name (Optional)</label>
-                        <input type="text" id="plannerName" placeholder="e.g. Jane Smith" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); box-sizing: border-box;">
+                        <input type="text" id="plannerName" placeholder="e.g. Jane Smith" style="width: 100%; padding: 0.5rem 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); box-sizing: border-box;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Planner Email (Optional)</label>
-                        <input type="email" id="plannerEmail" placeholder="e.g. jane@paramount.com" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); box-sizing: border-box;">
+                        <input type="email" id="plannerEmail" placeholder="e.g. jane@paramount.com" style="width: 100%; padding: 0.5rem 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); box-sizing: border-box;">
                     </div>
                 </div>
 
-                <div style="margin-top: 1rem;">
+                <div style="margin-top: 0.6rem;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Budget Sheet (Optional)</label>
-                    <input type="url" id="budgetSheetLink" placeholder="https://..." style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
+                    <input type="url" id="budgetSheetLink" placeholder="https://..." style="width: 100%; padding: 0.5rem 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
                 </div>
 
-                <div style="margin-top: 1rem;">
+                <div style="margin-top: 0.6rem;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Media Plan Link (Optional)</label>
-                    <input type="url" id="mediaPlanLink" placeholder="https://..." style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
+                    <input type="url" id="mediaPlanLink" placeholder="https://..." style="width: 100%; padding: 0.5rem 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
                 </div>
 
-                <div style="margin-top: 1rem;">
+                <div style="margin-top: 0.6rem;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Salesforce Link (Optional)</label>
-                    <input type="url" id="salesforceLink" placeholder="https://example.salesforce.com/..." style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
+                    <input type="url" id="salesforceLink" placeholder="https://example.salesforce.com/..." style="width: 100%; padding: 0.5rem 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
                 </div>
 
                 <div class="button-group">
@@ -1596,10 +1601,22 @@
             </div>
         </div>
 
+        <!-- Deep-link loading interstitial (confirmed 2026-09-23) — shown
+             instead of screen-0 while an embedded deep link resolves which
+             project to open (pullAssignedProjects + backfillMissingVersionsFromBackend
+             both round-trip to the backend first). Without this, screen-0's
+             own "active" class in the markup above left the full project
+             list visibly flashing for a couple of seconds on every deep
+             link before selectProjectById() finally swapped screens. -->
+        <div id="screen-deep-link-loading" class="screen" style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+            <div style="width: 36px; height: 36px; margin: 0 auto 1rem; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <div style="font-size: 0.95rem;">Loading your plan…</div>
+        </div>
+
         <!-- Screen 0.75: Version Management -->
         <div id="screen-0-75" class="screen">
             <!-- Sticky Action Bar -->
-            <div style="position: sticky; top: 0; z-index: 100; background: white; padding: 1rem 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div style="position: sticky; top: 0; z-index: 100; background: white; padding: 0.65rem 0; margin-bottom: 0.85rem; border-bottom: 2px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
                     <button class="btn-secondary" onclick="backToProjects()" style="padding: 0.6rem 1.25rem 0.6rem 1rem; display: inline-flex; align-items: center; gap: 0.4rem; margin-left: 1rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Back to Assignments</button>
                     <div style="flex: 1;"></div>
@@ -1609,7 +1626,7 @@
             </div>
             
             <div class="card">
-                <div class="card-header" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;">
+                <div class="card-header" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.6rem;">
                     <div>
                         <h2 id="versionProjectName" style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Project Name</h2>
                         <div id="projectInfoSummary" style="margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; font-size: 0.82rem; color: var(--text-muted);"></div>
@@ -1625,7 +1642,7 @@
                 </div>
 
                 <!-- Data Safety Banner -->
-                <div id="dataSafetyBanner" style="margin-bottom: 1.5rem; display: none;">
+                <div id="dataSafetyBanner" style="margin-bottom: 0.85rem; display: none;">
                     <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.875rem 1rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: #1e40af;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -1654,7 +1671,7 @@
                      taking up too much room on a screen most people only
                      need to glance at; a native <details> disclosure needs
                      no JS to expand/collapse. -->
-                <details style="margin-bottom: 1.25rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 8px;">
+                <details style="margin-bottom: 0.75rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 8px;">
                     <summary style="font-size: 0.85rem; font-weight: 700; cursor: pointer;">Project Files</summary>
                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -1826,7 +1843,7 @@
                     <p>Select how you want to build this sponsorship</p>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem;">
                     <div class="radio-option" onclick="chooseSponsorshipType('simple')">
                         <input type="radio" name="sponsorshipTypeChoice" id="stChoiceSimple" value="simple">
                         <label for="stChoiceSimple">
@@ -1844,7 +1861,7 @@
                     </div>
                 </div>
 
-                <div class="button-group" style="margin-top: 1.5rem;">
+                <div class="button-group" style="margin-top: 0.85rem;">
                     <button class="btn-secondary" onclick="showScreen('screen-1');">← Back</button>
                 </div>
             </div>
@@ -1895,7 +1912,7 @@
 
                 <!-- File Upload Section (shown only for detailed) -->
                 <div id="sponsorshipFileUpload" style="display: none;">
-                    <div id="sponsorshipUploadBox" style="margin-top: 1.5rem; padding: 1.5rem; border: 1.5px dashed var(--border); border-radius: 8px; text-align: center; background: var(--surface); cursor: pointer;"
+                    <div id="sponsorshipUploadBox" style="margin-top: 0.85rem; padding: 0.85rem; border: 1.5px dashed var(--border); border-radius: 8px; text-align: center; background: var(--surface); cursor: pointer;"
                          onclick="document.getElementById('sponsorshipFileInput').click();"
                          ondrop="handleSponsorshipDrop(event)"
                          ondragover="event.preventDefault(); event.currentTarget.style.borderColor = 'var(--accent)'; event.currentTarget.style.background = 'rgba(0, 100, 255, 0.03)';"
@@ -1938,7 +1955,7 @@
                     <p>Confirm or adjust which columns contain your sponsorship data</p>
                 </div>
 
-                <div id="tableDetectionInfo" style="padding: 1rem; background: var(--surface); border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid var(--success);">
+                <div id="tableDetectionInfo" style="padding: 0.65rem; background: var(--surface); border-radius: 6px; margin-bottom: 0.85rem; border-left: 4px solid var(--success);">
                     <strong style="color: var(--success-dark);">✓ Table Detected</strong>
                     <div id="tableDetectionDetails" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-muted);"></div>
                     <div style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
@@ -1950,7 +1967,7 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; margin-bottom: 0.85rem;">
                     <div class="form-group" style="margin: 0;">
                         <label>Platform/Brand Column</label>
                         <select id="colPlatform" onchange="updateColumnMapping()"></select>
@@ -1989,7 +2006,7 @@
                     </div>
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
+                <div style="margin-bottom: 0.85rem;">
                     <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; color: var(--primary);">Data Preview (First 5 Rows)</h3>
                     <div style="overflow-x: auto; max-height: 400px; border: 1px solid var(--border); border-radius: 6px;">
                         <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
@@ -2001,13 +2018,13 @@
                     </div>
                 </div>
 
-                <div id="detectionSummary" style="padding: 1rem; background: var(--surface); border-radius: 6px; border-left: 4px solid var(--primary);">
+                <div id="detectionSummary" style="padding: 0.65rem; background: var(--surface); border-radius: 6px; border-left: 4px solid var(--primary);">
                     <strong>Detection Summary</strong>
                     <div id="detectionSummaryContent" style="margin-top: 0.5rem; font-size: 0.875rem;"></div>
                 </div>
 
-                <div style="margin: 1rem 0; padding: 1rem; background: #eff6ff; border-radius: 6px; border: 1px solid #bfdbfe;">
-                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <div style="margin: 0.6rem 0; padding: 0.65rem; background: #eff6ff; border-radius: 6px; border: 1px solid #bfdbfe;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
                         <div>
                             <label style="font-weight: 600; font-size: 0.875rem; color: var(--primary); display: block; margin-bottom: 0.3rem;">Last Data Row <span class="required">*</span></label>
                             <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 0.5rem 0;">Enter the last row number that contains actual line item data. Rows after this will be ignored (footnotes, notes, totals).</p>
@@ -2036,21 +2053,21 @@
                     <p>Categorize each line item and add costs to calculate margins</p>
                 </div>
 
-                <div id="lineItemsSummaryBanner" style="padding: 1rem; background: var(--surface); border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+                <div id="lineItemsSummaryBanner" style="padding: 0.65rem; background: var(--surface); border-radius: 6px; margin-bottom: 0.85rem; border-left: 4px solid var(--primary);">
                     <strong id="lineItemsSummaryTitle"></strong>
                     <div id="lineItemsSummaryDetails" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-muted);"></div>
                 </div>
 
                 <!-- Line Items Container -->
-                <div id="lineItemsContainer" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+                <div id="lineItemsContainer" style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.85rem;">
                     <!-- Line items will be dynamically inserted here -->
                 </div>
 
                 <!-- Overall Summary -->
-                <div style="margin-top: 2rem; padding: 1.5rem; background: var(--surface); border-radius: 8px; border: 2px solid var(--primary);">
+                <div style="margin-top: 2rem; padding: 0.85rem; background: var(--surface); border-radius: 8px; border: 2px solid var(--primary);">
                     <h3 style="margin: 0 0 1rem 0; color: var(--primary);">Overall Summary</h3>
                     
-                    <div class="summary-grid" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 1rem;">
+                    <div class="summary-grid" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 0.6rem;">
                         <div class="summary-card">
                             <div class="summary-label">Total Price</div>
                             <div class="summary-value" id="sponsorshipTotalPrice">$0</div>
@@ -2081,7 +2098,7 @@
                         </div>
                     </div>
 
-                    <h4 style="margin: 1.5rem 0 0.75rem 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Category Breakdown</h4>
+                    <h4 style="margin: 1rem 0 0.6rem 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Category Breakdown</h4>
                     <div class="summary-grid" style="grid-template-columns: repeat(2, 1fr);">
                         <div class="summary-card">
                             <div class="summary-label">Creative Total</div>
@@ -2207,7 +2224,7 @@
                     <div id="feesFields" style="display: none;">
                         <div class="form-group">
                             <label>Fee Type <span class="required">*</span></label>
-                            <div class="radio-group" style="flex-direction: row; gap: 1rem;">
+                            <div class="radio-group" style="flex-direction: row; gap: 0.6rem;">
                                 <div class="radio-option" style="flex: 1;">
                                     <input type="radio" id="feeTypeIntegration" name="feeType" value="integration" checked>
                                     <label for="feeTypeIntegration">Integration</label>
@@ -2244,7 +2261,7 @@
                         <!-- Pricing Metric Choice (only for X Amplify) -->
                         <div id="pricingMetricChoice" class="form-group" style="display: none;">
                             <label>Pricing Metric <span class="required">*</span></label>
-                            <div style="display: flex; gap: 1rem;">
+                            <div style="display: flex; gap: 0.6rem;">
                                 <label style="display: flex; align-items: center; cursor: pointer;">
                                     <input type="radio" name="pricingMetric" value="cpv" checked onchange="togglePricingMetric()">
                                     <span style="margin-left: 0.5rem;">CPV (Cost Per View)</span>
@@ -2454,7 +2471,7 @@
                         </div>
                         
                         <!-- Common Summary -->
-                        <div class="summary-grid" style="grid-template-columns: 1fr 1fr; margin-top: 1rem;">
+                        <div class="summary-grid" style="grid-template-columns: 1fr 1fr; margin-top: 0.6rem;">
                             <div class="summary-card" style="background: rgba(239, 68, 68, 0.05); border: 2px solid var(--danger);">
                                 <div class="summary-label">Total Cost to Us</div>
                                 <div class="summary-value" style="color: var(--danger);" id="addedValueTotalCost">$0</div>
@@ -2487,7 +2504,7 @@
                         </div>
                         <div class="form-group">
                             <label>How do you want to size this package? <span class="required">*</span></label>
-                            <div style="display: flex; gap: 1.5rem; margin-top: 0.4rem;">
+                            <div style="display: flex; gap: 0.75rem; margin-top: 0.4rem;">
                                 <label style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer;">
                                     <input type="radio" name="blendedInputMode" value="margin" checked onchange="switchBlendedInputMode('margin')"> Input Margin %
                                 </label>
@@ -2598,7 +2615,7 @@
                             <div id="investmentSplitSection">
                                 <div class="form-group">
                                     <label>Investment Split Type</label>
-                                    <div class="radio-group" style="flex-direction: row; gap: 1rem;">
+                                    <div class="radio-group" style="flex-direction: row; gap: 0.6rem;">
                                         <div class="radio-option" style="flex: 1;">
                                             <input type="radio" id="mediaTypeDollar" name="mediaType" value="dollar" onchange="updateInvestmentSplit()">
                                             <label for="mediaTypeDollar">$ Amount</label>
@@ -2644,7 +2661,7 @@
                             </div>
                             
                             <!-- Campaign Type (Influencer only) -->
-                            <div id="campaignTypeSection" class="form-group" style="margin-top: 1.5rem; display: none;">
+                            <div id="campaignTypeSection" class="form-group" style="margin-top: 0.85rem; display: none;">
                                 <label>Campaign Type (Optional)</label>
                                 <select id="campaignType">
                                     <option value="">Select Campaign Type</option>
@@ -2655,7 +2672,7 @@
                             </div>
                             
                             <!-- Production Fee Presentation (Influencer & Branded Content) -->
-                            <div id="productionPresentationSection" class="form-group" style="margin-top: 1.5rem; display: none;">
+                            <div id="productionPresentationSection" class="form-group" style="margin-top: 0.85rem; display: none;">
                                 <label>Production Fee Presentation (Optional)</label>
                                 <select id="productionPresentation">
                                     <option value="">Select Presentation</option>
@@ -2676,7 +2693,7 @@
                                 ➕ Add Platform
                             </button>
 
-                            <div id="percentageValidation" style="margin-top: 1rem; padding: 0.75rem; border-radius: 6px; font-weight: 600; text-align: center; display: none;"></div>
+                            <div id="percentageValidation" style="margin-top: 0.6rem; padding: 0.75rem; border-radius: 6px; font-weight: 600; text-align: center; display: none;"></div>
                             
                         </div>
                     </div>
@@ -2714,7 +2731,7 @@
 
             <div class="card">
                 <!-- Paramount Handles Guidance - Modern Gradient Card -->
-                <div id="paramountCPMGuidance" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 1rem; margin-bottom: 1.5rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);">
+                <div id="paramountCPMGuidance" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 0.65rem; margin-bottom: 0.85rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <span style="font-size: 1.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">💡</span>
                         <div>
@@ -2728,7 +2745,7 @@
                 </div>
 
                 <!-- Production & Talent Markup Section -->
-                <div id="talentMarkupSection" style="margin-bottom: 3rem; background: #F8FAFB; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+                <div id="talentMarkupSection" style="margin-bottom: 3rem; background: #F8FAFB; padding: 0.85rem; border-radius: 8px; border: 1px solid #E2E8F0;">
                     <div style="margin: 0 0 1rem;">
                         <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; margin: 0 0 0.25rem; font-size: 1.25rem; color: #1e293b; font-weight: 700;">Production & Talent</h2>
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -2745,7 +2762,7 @@
                         </div>
                     </div>
 
-                    <div class="summary-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1rem;">
+                    <div class="summary-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 0.6rem;">
                         <div class="summary-card">
                             <div class="summary-label">Talent Investment</div>
                             <div class="summary-value" id="talentInvestmentDisplay">$0</div>
@@ -2761,7 +2778,7 @@
                     </div>
                 </div>
 
-                <div style="background: #F8FAFB; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+                <div style="background: #F8FAFB; padding: 0.85rem; border-radius: 8px; border: 1px solid #E2E8F0;">
                     <div style="margin: 0 0 1rem;">
                         <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; margin: 0 0 0.25rem; font-size: 1.25rem; color: #1e293b; font-weight: 700;">Media Placement Pricing & Premiums</h2>
                         <p style="margin: 0; color: var(--text-muted); font-size: 0.875rem;">Set the CPM pricing and apply premiums for each placement</p>
@@ -2787,7 +2804,7 @@
                 </div>
                 </div>
 
-                <div id="pricingTotals" style="margin-top: 1.5rem; padding: 1rem; background: var(--background); border-radius: 8px; border: 1px solid var(--border);"></div>
+                <div id="pricingTotals" style="margin-top: 0.85rem; padding: 0.65rem; background: var(--background); border-radius: 8px; border: 1px solid var(--border);"></div>
 
                 <div class="button-group">
                     <button class="btn-secondary" onclick="prevStep(3)">← Previous</button>
@@ -2829,11 +2846,11 @@
                     ℹ️ The tool uses inverse markup calculation: Cost = Investment / (1 + Markup%)
                 </div>
 
-                <div style="background: #F8FAFB; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 2rem;">
+                <div style="background: #F8FAFB; padding: 0.85rem; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 0.6rem;">
                     <h3 style="margin: 0 0 1rem; font-size: 1.1rem; color: #1e293b; font-weight: 600;">Production & Talent</h3>
                 
                 <div class="form-group">
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;">
                         <div style="flex: 1;">
                             <label style="margin-bottom: 0;">Production & Talent Markup (%) <span style="font-size: 0.875rem; font-weight: normal; color: var(--text-muted);">(☑ to edit)</span></label>
                             <span class="hint" style="display: block; margin-top: 0.25rem;">Default is 25%. This determines the margin on production costs.</span>
@@ -2850,7 +2867,7 @@
                     </div>
                 </div>
 
-                <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 2rem;">
+                <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 0.6rem;">
                     <table style="margin: 0;">
                         <thead>
                             <tr style="background: var(--background);">
@@ -2872,7 +2889,7 @@
                 </div>
                 </div>
 
-                <div style="background: #F8FAFB; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+                <div style="background: #F8FAFB; padding: 0.85rem; border-radius: 8px; border: 1px solid #E2E8F0;">
                     <h3 style="margin: 0 0 1rem; font-size: 1.1rem; color: #1e293b; font-weight: 600;">Media Placements</h3>
 
                 <div class="table-container">
@@ -2971,12 +2988,12 @@
                     </div>
                 </div>
 
-                <div id="summaryBlendedPlatforms" style="display: none; margin: 2rem 0;">
+                <div id="summaryBlendedPlatforms" style="display: none; margin: 0.6rem 0;">
                     <h3 style="margin: 0 0 1rem; font-size: 1.1rem; color: var(--primary);">Distribution Platforms</h3>
                     <div id="blendedPlatformsList" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
                 </div>
 
-                <h3 id="summaryBreakdownHeader" style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: var(--primary); font-weight: 700;">Cost Breakdown</h3>
+                <h3 id="summaryBreakdownHeader" style="margin: 1rem 0 0.6rem; font-size: 1rem; color: var(--primary); font-weight: 700;">Cost Breakdown</h3>
                 
                 <div class="summary-grid" id="summaryBreakdownGrid" style="grid-template-columns: repeat(2, 1fr);">
                     <div class="summary-card" id="summaryTalentCard">
@@ -2994,21 +3011,21 @@
                 </div>
 
                 <!-- Sponsorship Line Items Summary (shown only for detailed sponsorships) -->
-                <div id="sponsorshipLineItemsSummary" style="display: none; margin: 2rem 0;">
+                <div id="sponsorshipLineItemsSummary" style="display: none; margin: 0.6rem 0;">
                     <h3 style="margin: 0 0 1rem; font-size: 1.1rem; color: var(--primary);">Line Items Summary</h3>
-                    <div id="sponsorshipLineItemsContainer" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div id="sponsorshipLineItemsContainer" style="display: flex; flex-direction: column; gap: 0.6rem;">
                         <!-- Line items will be inserted here -->
                     </div>
                 </div>
 
                 <div style="margin-top: 2rem;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Package Notes (Optional)</label>
-                    <textarea id="packageNotes" rows="3" placeholder="Add any notes about this package..." style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; font-family: inherit; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);"></textarea>
+                    <textarea id="packageNotes" rows="3" placeholder="Add any notes about this package..." style="width: 100%; padding: 0.5rem 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; font-family: inherit; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);"></textarea>
                 </div>
 
-                <div style="margin-top: 1rem;">
+                <div style="margin-top: 0.6rem;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">Reference URL (Optional)</label>
-                    <input type="url" id="packageURL" placeholder="https://example.com/package-details" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
+                    <input type="url" id="packageURL" placeholder="https://example.com/package-details" style="width: 100%; padding: 0.5rem 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.9375rem; transition: all 0.2s ease; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);">
                 </div>
 
                 <div class="button-group">
@@ -3021,7 +3038,7 @@
         <!-- Screen 8: Version Summary (Multiple Packages) -->
         <div id="screen-6" class="screen">
             <!-- Sticky Action Bar -->
-            <div style="position: sticky; top: 0; z-index: 100; background: white; padding: 1rem 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div style="position: sticky; top: 0; z-index: 100; background: white; padding: 0.65rem 0; margin-bottom: 0.85rem; border-bottom: 2px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
                     <button class="btn-secondary" onclick="backToVersions()" style="padding: 0.6rem 1.25rem 0.6rem 1rem; display: inline-flex; align-items: center; gap: 0.4rem; margin-left: 1rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Back to Versions</button>
                     <div style="flex: 1;"></div>
@@ -3038,11 +3055,11 @@
                     <p>All packages in this version</p>
                 </div>
 
-                <div id="versionSummaryOverall" style="margin-bottom: 1rem; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <div id="versionSummaryOverall" style="margin-bottom: 0.6rem; padding: 0.65rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
                     <!-- Overall version totals -->
                 </div>
 
-                <div id="investmentCategoryBreakdown" style="margin-bottom: 2rem;">
+                <div id="investmentCategoryBreakdown" style="margin-bottom: 0.6rem;">
                     <!-- Investment category breakdown -->
                 </div>
 
@@ -3056,12 +3073,12 @@
 
         <!-- Closed Deals Section -->
         <div id="closeddeals-section" class="tab-content">
-            <div style="text-align: center; padding: 1.5rem 0;">
+            <div style="text-align: center; padding: 0.85rem 0;">
                 <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; color: var(--primary); font-size: 2rem; margin-bottom: 0.5rem;">Closed Deals</h2>
                 <p style="color: var(--text-muted); font-size: 1rem;">Versions marked as the closed/sold plan across all projects, with Finance/Ops verification status</p>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem;">
                 <span id="supabaseSyncIndicator" style="display: none; align-items: center; gap: 0.4rem; font-size: 0.8125rem; color: #92400E; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 6px; padding: 0.4rem 0.75rem;">
                     ⏳ <span class="sync-count">0</span> deal(s) not yet synced to the shared list
                     <button class="btn-secondary btn-sm" onclick="retryPendingSupabaseSyncs().then(() => renderClosedDealsList()); retryPendingClosedDealBackendSyncs();" style="margin-left: 0.25rem;">Retry Now</button>
@@ -3076,7 +3093,7 @@
         <div id="tools-section" class="tab-content">
             <!-- Tools Menu -->
             <div id="tools-menu" class="tool-screen active">
-                <div style="text-align: center; padding: 2rem 0;">
+                <div style="text-align: center; padding: 0.65rem 0;">
                     <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; color: var(--primary); font-size: 2rem; margin-bottom: 0.5rem;">Budgeting & Planning Tools</h2>
                     <p style="color: var(--text-muted); font-size: 1rem;">Select a tool to help with your media planning calculations</p>
                 </div>
@@ -3135,7 +3152,7 @@
 
             <!-- Flat Fee Budgeting Tool -->
             <div id="tool-flatfee" class="tool-screen">
-                <button class="btn-secondary" onclick="backToToolsMenu()" style="margin-bottom: 1.5rem;">← Back to Tools</button>
+                <button class="btn-secondary" onclick="backToToolsMenu()" style="margin-bottom: 0.85rem;">← Back to Tools</button>
                 
                 <div class="card">
                     <div class="card-header">
@@ -3144,7 +3161,7 @@
                     </div>
 
                     <!-- Calculator Selector -->
-                    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; padding: 1rem; background: var(--background); border-radius: 8px;">
+                    <div style="display: flex; gap: 0.6rem; margin-bottom: 0.6rem; padding: 0.65rem; background: var(--background); border-radius: 8px;">
                         <button class="btn-secondary" id="flatfee-calc-a-btn" onclick="switchFlatFeeCalc('a')" style="flex: 1;">
                             Budget Calculator<br><small style="font-weight: normal; opacity: 0.8;">Know Price + Markup</small>
                         </button>
@@ -3188,7 +3205,7 @@
                                     <div class="calc-output-label">Margin</div>
                                     <div class="calc-output-value" id="ff-a-output-margin">$0.00</div>
                                 </div>
-                                <button class="btn-secondary" onclick="copyFlatFeeResults('a')" style="width: 100%; margin-top: 1rem;">📋 Copy Results</button>
+                                <button class="btn-secondary" onclick="copyFlatFeeResults('a')" style="width: 100%; margin-top: 0.6rem;">📋 Copy Results</button>
                             </div>
                         </div>
                     </div>
@@ -3228,7 +3245,7 @@
                                     <div class="calc-output-label">Margin</div>
                                     <div class="calc-output-value" id="ff-b-output-margin">$0.00</div>
                                 </div>
-                                <button class="btn-secondary" onclick="copyFlatFeeResults('b')" style="width: 100%; margin-top: 1rem;">📋 Copy Results</button>
+                                <button class="btn-secondary" onclick="copyFlatFeeResults('b')" style="width: 100%; margin-top: 0.6rem;">📋 Copy Results</button>
                             </div>
                         </div>
                     </div>
@@ -3237,7 +3254,7 @@
 
             <!-- Blended Social Package Tool -->
             <div id="tool-blended" class="tool-screen">
-                <button class="btn-secondary" onclick="backToToolsMenu()" style="margin-bottom: 1.5rem;">← Back to Tools</button>
+                <button class="btn-secondary" onclick="backToToolsMenu()" style="margin-bottom: 0.85rem;">← Back to Tools</button>
                 
                 <div class="card">
                     <div class="card-header">
@@ -3246,7 +3263,7 @@
                     </div>
 
                     <!-- Calculator Selector -->
-                    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; padding: 1rem; background: var(--background); border-radius: 8px;">
+                    <div style="display: flex; gap: 0.6rem; margin-bottom: 0.6rem; padding: 0.65rem; background: var(--background); border-radius: 8px;">
                         <button class="btn-secondary" id="blended-calc-a-btn" onclick="switchBlendedCalc('a')" style="flex: 1;">
                             Production Budget<br><small style="font-weight: normal; opacity: 0.8;">Calculate Available Budget</small>
                         </button>
@@ -3319,7 +3336,7 @@
                                     <div class="calc-output-label">Media %</div>
                                     <div class="calc-output-value" id="bl-a-output-media-pct">0.00%</div>
                                 </div>
-                                <button class="btn-secondary" onclick="copyBlendedResults('a')" style="width: 100%; margin-top: 1rem;">📋 Copy Results</button>
+                                <button class="btn-secondary" onclick="copyBlendedResults('a')" style="width: 100%; margin-top: 0.6rem;">📋 Copy Results</button>
                             </div>
                         </div>
                     </div>
@@ -3385,7 +3402,7 @@
                                     <div class="calc-output-label">Media %</div>
                                     <div class="calc-output-value" id="bl-b-output-media-pct">0.00%</div>
                                 </div>
-                                <button class="btn-secondary" onclick="copyBlendedResults('b')" style="width: 100%; margin-top: 1rem;">📋 Copy Results</button>
+                                <button class="btn-secondary" onclick="copyBlendedResults('b')" style="width: 100%; margin-top: 0.6rem;">📋 Copy Results</button>
                             </div>
                         </div>
                     </div>
@@ -3451,7 +3468,7 @@
                                     <div class="calc-output-label">Media %</div>
                                     <div class="calc-output-value" id="bl-c-output-media-pct">0.00%</div>
                                 </div>
-                                <button class="btn-secondary" onclick="copyBlendedResults('c')" style="width: 100%; margin-top: 1rem;">📋 Copy Results</button>
+                                <button class="btn-secondary" onclick="copyBlendedResults('c')" style="width: 100%; margin-top: 0.6rem;">📋 Copy Results</button>
                             </div>
                         </div>
                     </div>
@@ -3460,7 +3477,7 @@
 
             <!-- Media % Lookup Tool -->
             <div id="tool-medialookup" class="tool-screen">
-                <button class="btn-secondary" onclick="backToToolsMenu()" style="margin-bottom: 1.5rem;">← Back to Tools</button>
+                <button class="btn-secondary" onclick="backToToolsMenu()" style="margin-bottom: 0.85rem;">← Back to Tools</button>
                 
                 <div class="card">
                     <div class="card-header">
@@ -3470,7 +3487,7 @@
 
                     <!-- Step 1: Campaign Type Selection -->
                     <div id="lookup-step-1">
-                        <h3 style="color: var(--primary); margin-bottom: 1rem;">Step 1: What kind of campaign are you planning for?</h3>
+                        <h3 style="color: var(--primary); margin-bottom: 0.6rem;">Step 1: What kind of campaign are you planning for?</h3>
                         <div class="radio-group">
                             <label class="radio-option">
                                 <input type="radio" name="campaign-type" value="branded" onchange="selectCampaignType('branded')">
@@ -3495,8 +3512,8 @@
 
                     <!-- Step 2A: Branded Content Options -->
                     <div id="lookup-step-2a" style="display: none; margin-top: 2rem;">
-                        <h3 style="color: var(--primary); margin-bottom: 1rem;">Step 2: Distribution Strategy</h3>
-                        <div class="radio-group" style="margin-bottom: 2rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.6rem;">Step 2: Distribution Strategy</h3>
+                        <div class="radio-group" style="margin-bottom: 0.6rem;">
                             <label class="radio-option">
                                 <input type="radio" name="distribution" value="yt-paramount" onchange="updateDistribution()">
                                 <span><strong>YouTube + Paramount Social</strong></span>
@@ -3515,7 +3532,7 @@
                             </label>
                         </div>
 
-                        <h3 style="color: var(--primary); margin-bottom: 1rem;">Production Cost Presentation</h3>
+                        <h3 style="color: var(--primary); margin-bottom: 0.6rem;">Production Cost Presentation</h3>
                         <div class="radio-group">
                             <label class="radio-option">
                                 <input type="radio" name="presentation" value="broken" onchange="updatePresentation()">
@@ -3542,10 +3559,10 @@
 
     <!-- Custom Confirmation Dialog -->
     <div id="confirmDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 style="margin-bottom: 1rem; color: var(--primary);" id="confirmTitle">Confirm Action</h3>
-            <p style="margin-bottom: 2rem; color: var(--text);" id="confirmMessage"></p>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 500px; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 style="margin-bottom: 0.6rem; color: var(--primary);" id="confirmTitle">Confirm Action</h3>
+            <p style="margin-bottom: 0.6rem; color: var(--text);" id="confirmMessage"></p>
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
                 <button class="btn-secondary" onclick="cancelConfirm()">Cancel</button>
                 <button id="confirmBtn" class="btn-danger" onclick="acceptConfirm()">Delete</button>
             </div>
@@ -3554,13 +3571,13 @@
 
     <!-- Custom Rename Dialog -->
     <div id="renameDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 600px; width: 90%; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 id="renameTitle" style="margin-bottom: 1rem; color: var(--primary);">Rename</h3>
-            <p style="margin-bottom: 1rem; color: var(--text);" id="renameMessage">Enter new name:</p>
-            <div style="margin-bottom: 2rem;">
+        <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 600px; width: 90%; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 id="renameTitle" style="margin-bottom: 0.6rem; color: var(--primary);">Rename</h3>
+            <p style="margin-bottom: 0.6rem; color: var(--text);" id="renameMessage">Enter new name:</p>
+            <div style="margin-bottom: 0.6rem;">
                 <input type="text" id="renameInput" style="width: 100%; padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;">
             </div>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
                 <button class="btn-secondary" onclick="cancelRename()">Cancel</button>
                 <button id="renameBtn" class="btn-primary" onclick="acceptRename()">Rename</button>
             </div>
@@ -3569,10 +3586,10 @@
 
     <!-- Custom Alert Dialog -->
     <div id="alertDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 style="margin-bottom: 1rem; color: var(--primary); display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'PeakSans', sans-serif; font-weight: 600;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative;top:-1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Attention</h3>
-            <p style="margin-bottom: 2rem; color: var(--text); line-height: 1.6;" id="alertMessage"></p>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 500px; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 style="margin-bottom: 0.6rem; color: var(--primary); display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'PeakSans', sans-serif; font-weight: 600;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative;top:-1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Attention</h3>
+            <p style="margin-bottom: 0.6rem; color: var(--text); line-height: 1.6;" id="alertMessage"></p>
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
                 <button class="btn-primary" onclick="closeAlert()" style="min-width: 100px; text-align: center; justify-content: center;">OK</button>
             </div>
         </div>
@@ -3580,20 +3597,20 @@
 
     <!-- Verify Closed Deal Dialog -->
     <div id="verifyDealDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 550px; width: 90%; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 550px; width: 90%; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
             <h3 id="verifyDealTitle" style="margin-bottom: 0.75rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600;">Verify Closed Deal</h3>
-            <div style="background: var(--background); border-left: 3px solid var(--primary); border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+            <div style="background: var(--background); border-left: 3px solid var(--primary); border-radius: 4px; padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
                 This step is intended for Finance, Operations, or a Manager to confirm that this saved plan matches what was actually sold. If it doesn't match exactly, please edit the plan first so it does, then verify.
             </div>
-            <div style="margin-bottom: 1.25rem;">
+            <div style="margin-bottom: 0.75rem;">
                 <label style="display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.875rem;">Your Name <span style="color: var(--danger);">*</span></label>
                 <input type="text" id="verifyDealName" placeholder="Enter your name" style="width: 100%; padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;">
             </div>
-            <div style="margin-bottom: 1.5rem;">
+            <div style="margin-bottom: 0.85rem;">
                 <label style="display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.875rem;">Notes (Optional)</label>
                 <textarea id="verifyDealNotes" placeholder="e.g. Client added a 4th platform after signing; this plan reflects the renegotiated terms as of 8/1." style="width: 100%; min-height: 90px; padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.875rem; resize: vertical; box-sizing: border-box;"></textarea>
             </div>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
                 <button class="btn-secondary" onclick="cancelVerifyDeal()">Cancel</button>
                 <button id="verifyDealConfirmBtn" class="btn-primary" onclick="confirmVerifyDeal()">Confirm Verification</button>
             </div>
@@ -3603,13 +3620,13 @@
     <!-- Deal Match Picker Dialog (fallback when the exact verified plan isn't
          available locally, but multiple similarly-named candidates were found) -->
     <div id="dealMatchPickerDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 550px; width: 90%; max-height: 80vh; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
+        <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 550px; width: 90%; max-height: 80vh; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
             <h3 style="margin-bottom: 0.75rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600;">Which Plan Did You Mean?</h3>
-            <div style="background: var(--background); border-left: 3px solid var(--primary); border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+            <div style="background: var(--background); border-left: 3px solid var(--primary); border-radius: 4px; padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
                 We couldn't find the exact verified plan locally (it may have been created in a different browser), but found more than one similarly-named project. Pick the one you meant — this may or may not be the exact same plan that was verified elsewhere.
             </div>
             <div id="dealMatchPickerList" style="overflow-y: auto; flex: 1;"></div>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.6rem;">
                 <button class="btn-secondary" onclick="closeDealMatchPicker()">Cancel</button>
             </div>
         </div>
@@ -3618,22 +3635,22 @@
 
     <!-- Generate External Plan Modal -->
     <div id="externalPlanDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 540px; width: 90%; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 540px; width: 90%; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
             <h3 style="margin-bottom: 0.5rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600;">Generate External Plan</h3>
-            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">Select the versions to include. The plan will be generated as a Google Sheet.</p>
-            <div style="margin-bottom: 1.5rem;">
+            <p style="margin-bottom: 0.85rem; color: var(--text-secondary); font-size: 0.875rem;">Select the versions to include. The plan will be generated as a Google Sheet.</p>
+            <div style="margin-bottom: 0.85rem;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
                     <label style="font-weight: 600; font-size: 0.875rem; color: var(--text);">Versions</label>
                     <button onclick="toggleAllVersions()" id="toggleAllBtn" style="background: none; border: none; color: var(--accent); font-size: 0.8rem; cursor: pointer; font-weight: 500;">Deselect All</button>
                 </div>
                 <div id="versionCheckboxList" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 8px;"></div>
             </div>
-            <div style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; display: flex; align-items: center; gap: 0.6rem; font-size: 0.875rem; color: var(--text-secondary);">
+            <div style="margin-bottom: 0.85rem; padding: 0.5rem 0.75rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; display: flex; align-items: center; gap: 0.6rem; font-size: 0.875rem; color: var(--text-secondary);">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 The plan will be saved to the <strong style="color:var(--text);">Creative+ Shared Drive</strong>. You can move it from there like any other file.
             </div>
-            <div id="externalPlanStatus" style="display: none; margin-bottom: 1.5rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.875rem;"></div>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <div id="externalPlanStatus" style="display: none; margin-bottom: 0.85rem; padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.875rem;"></div>
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
                 <button class="btn-secondary" onclick="closeExternalPlanModal()">Cancel</button>
                 <button id="generatePlanBtn" onclick="generateExternalPlan()" style="padding: 0.6rem 1.5rem; background: #001A6E; color: white; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -3648,26 +3665,26 @@
 
     <!-- Custom Import Options Dialog -->
     <div id="importOptionsDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 600px; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 style="margin-bottom: 1rem; color: var(--primary);">Project Already Open</h3>
-            <div id="importOptionsMessage" style="margin-bottom: 1rem; padding: 1rem; background: var(--background); border-radius: 8px; border-left: 4px solid var(--accent);">
+        <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 600px; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 style="margin-bottom: 0.6rem; color: var(--primary);">Project Already Open</h3>
+            <div id="importOptionsMessage" style="margin-bottom: 0.6rem; padding: 0.65rem; background: var(--background); border-radius: 8px; border-left: 4px solid var(--accent);">
                 <!-- Message will be inserted here -->
             </div>
-            <p style="margin-bottom: 1rem; color: var(--text); font-weight: 500;">What would you like to do?</p>
-            <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
-                <button class="btn-primary" onclick="importOptionReplace()" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;">
+            <p style="margin-bottom: 0.6rem; color: var(--text); font-weight: 500;">What would you like to do?</p>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.6rem;">
+                <button class="btn-primary" onclick="importOptionReplace()" style="justify-content: flex-start; text-align: left; padding: 0.5rem 0.75rem;">
                     <div>
                         <div style="font-weight: 600; margin-bottom: 0.25rem;">🔄 Replace Current Project</div>
                         <div style="font-size: 0.875rem; opacity: 0.8;">Update the open project with the file's contents (recommended if loading latest version)</div>
                     </div>
                 </button>
-                <button class="btn-secondary" onclick="importOptionRename()" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;">
+                <button class="btn-secondary" onclick="importOptionRename()" style="justify-content: flex-start; text-align: left; padding: 0.5rem 0.75rem;">
                     <div>
                         <div style="font-weight: 600; margin-bottom: 0.25rem;">✏️ Import and Rename</div>
                         <div style="font-size: 0.875rem; opacity: 0.8;">Keep both versions - you'll choose a new name for the imported project</div>
                     </div>
                 </button>
-                <button class="btn-secondary" onclick="importOptionCancel()" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;">
+                <button class="btn-secondary" onclick="importOptionCancel()" style="justify-content: flex-start; text-align: left; padding: 0.5rem 0.75rem;">
                     <div>
                         <div style="font-weight: 600; margin-bottom: 0.25rem;">❌ Cancel</div>
                         <div style="font-size: 0.875rem; opacity: 0.8;">Don't import this file</div>
@@ -3679,17 +3696,17 @@
 
     <!-- Custom Export Dialog -->
     <div id="exportDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; margin: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 style="margin-bottom: 1rem; color: var(--primary);">Export Internal Plan</h3>
-            <p style="margin-bottom: 1rem; color: var(--text);">Enter filename for export:</p>
-            <div style="margin-bottom: 1rem;">
+        <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 500px; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 style="margin-bottom: 0.6rem; color: var(--primary);">Export Internal Plan</h3>
+            <p style="margin-bottom: 0.6rem; color: var(--text);">Enter filename for export:</p>
+            <div style="margin-bottom: 0.6rem;">
                 <input type="text" id="exportFilenameInput" style="width: 100%; padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.875rem; font-family: monospace;">
                 <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">File will be saved as: <strong id="exportFilenamePreview"></strong></p>
             </div>
             <div class="alert alert-info" style="font-size: 0.875rem;">
                 ℹ️ Save this file to your Google Drive for backup and sharing with your team.
             </div>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.85rem;">
                 <button class="btn-secondary" onclick="cancelExport()">Cancel</button>
                 <button class="btn-success" onclick="confirmExport()">📥 Export</button>
             </div>
@@ -4499,6 +4516,12 @@
                 // Skip screen-0 entirely — avoid a flash of the tool's own
                 // project list when the Assignment Log (in the parent
                 // shell) already told us exactly which project to open.
+                // Swapped to a loading interstitial instead of just doing
+                // nothing here, since screen-0 defaults to visible in the
+                // static markup and was flashing for a couple of seconds
+                // while pullAssignedProjects()/backfillMissingVersionsFromBackend()
+                // round-trip to the backend below.
+                showScreen('screen-deep-link-loading');
             } else {
                 displayProjects();
                 showScreen('screen-0');
@@ -4511,8 +4534,18 @@
             pullAssignedProjects().then(async function () { // fire and forget — pick up new Assignment-created projects
                 if (IS_EMBEDDED && DEEP_LINK_PROJECT_ID) {
                     const project = projects.find(p => p.id === DEEP_LINK_PROJECT_ID);
-                    if (project) await backfillMissingVersionsFromBackend(project);
-                    selectProjectById(DEEP_LINK_PROJECT_ID);
+                    if (project) {
+                        await backfillMissingVersionsFromBackend(project);
+                        selectProjectById(DEEP_LINK_PROJECT_ID);
+                    } else {
+                        // Project genuinely not found (bad link, deleted, or
+                        // not yet synced) — fall back to the project list
+                        // rather than leaving the loading interstitial
+                        // spinning forever with no way out.
+                        displayProjects();
+                        showScreen('screen-0');
+                        customAlert('Could not find that project. It may have been deleted, or hasn\'t synced yet — showing the project list instead.');
+                    }
                 }
             });
 
@@ -6546,7 +6579,7 @@
             }
             const rows = Object.values(categories).filter(cat => cat.investment !== 0 || cat.cost !== 0);
             return `
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin-bottom: 1rem;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin-bottom: 0.6rem;">
                     <thead>
                         <tr style="background: var(--background); border-bottom: 2px solid var(--border);">
                             <th style="padding: 0.5rem 0.6rem; text-align: left;">Category</th>
@@ -6739,7 +6772,7 @@
             const modal = document.getElementById('dealMatchPickerDialog');
             const list = document.getElementById('dealMatchPickerList');
             list.innerHTML = candidates.map((c, i) => `
-                <div onclick="chooseDealMatchCandidate(${i})" style="padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='var(--background)'" onmouseout="this.style.background='white'">
+                <div onclick="chooseDealMatchCandidate(${i})" style="padding: 0.5rem 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='var(--background)'" onmouseout="this.style.background='white'">
                     <div style="font-weight: 600;">${escapeHtml(c.project.projectName)}</div>
                     <div style="font-size: 0.8125rem; color: var(--text-muted);">${escapeHtml(c.project.account || '')}${c.project.agencyName ? ' • ' + escapeHtml(c.project.agencyName) : ''} — ${escapeHtml(c.version.name || 'Version ' + (i + 1))}</div>
                 </div>
@@ -6777,7 +6810,7 @@
             };
 
             return `
-                <div style="padding: 1.25rem 1.5rem; background: #F8FAFC; border-top: 2px solid var(--border);">
+                <div style="padding: 0.85rem 1.1rem; background: #F8FAFC; border-top: 2px solid var(--border);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
                         <h4 style="margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary);">Identification</h4>
                         <button class="btn-primary btn-sm" onclick="event.stopPropagation(); openLiveSummaryForDeal('${deal.dealId}');" style="display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
@@ -6785,7 +6818,7 @@
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         </button>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem 1rem; margin-bottom: 1.25rem; font-size: 0.8125rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem 1rem; margin-bottom: 0.75rem; font-size: 0.8125rem;">
                         <div><strong>Project:</strong> ${escapeHtml(id.projectName)}</div>
                         <div><strong>Account:</strong> ${escapeHtml(id.account)}${id.brand ? ' / ' + escapeHtml(id.brand) : ''}</div>
                         <div><strong>Agency:</strong> ${escapeHtml(id.agencyName)}</div>
@@ -6803,7 +6836,7 @@
                     ` : ''}
 
                     <h4 style="margin: 0 0 0.75rem 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary);">Overall Totals</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; margin-bottom: 1.25rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; margin-bottom: 0.75rem;">
                         <div style="background: white; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.75rem;"><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Investment</div><div style="font-weight: 700;">$${formatNumber(overall.totalInvestment)}</div></div>
                         <div style="background: white; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.75rem;"><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Impressions</div><div style="font-weight: 700;">${formatImpressions(overall.totalImpressions)}</div></div>
                         <div style="background: white; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.75rem;"><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">CPM</div><div style="font-weight: 700;">$${overall.overallCPM.toFixed(2)}</div></div>
@@ -6905,7 +6938,7 @@
         async function renderClosedDealsList() {
             const container = document.getElementById('closedDealsListContainer');
             if (!container) return;
-            container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading shared Closed Deals...</div>`;
+            container.innerHTML = `<div style="text-align: center; padding: 0.65rem; color: var(--text-muted);">Loading shared Closed Deals...</div>`;
 
             retryPendingSupabaseSyncs(); // fire and forget, don't block the render below
             retryPendingClosedDealBackendSyncs();
@@ -6958,11 +6991,11 @@
 
             container.innerHTML = `
                 ${isOffline ? `
-                <div style="margin-bottom: 1rem; padding: 0.75rem 1rem; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; font-size: 0.875rem; color: #92400E;">
+                <div style="margin-bottom: 0.6rem; padding: 0.5rem 0.75rem; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; font-size: 0.875rem; color: #92400E;">
                     ⚠ Couldn't reach the shared Closed Deals table — showing this browser's local data only, which may not reflect everyone's latest verified deals. <button class="btn-secondary btn-sm" onclick="renderClosedDealsList()" style="margin-left: 0.5rem;">Retry</button>
                 </div>
                 ` : ''}
-                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem; padding: 0.875rem 1rem; background: var(--background); border-radius: 8px; border: 1px solid var(--border);">
+                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-bottom: 0.6rem; padding: 0.875rem 1rem; background: var(--background); border-radius: 8px; border: 1px solid var(--border);">
                     <div>
                         <label style="display:block; font-size:0.75rem; color: var(--text-muted); margin-bottom:0.25rem;">Account</label>
                         <select onchange="updateClosedDealsFilter('account', this.value)" style="padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8125rem;">
@@ -7155,7 +7188,7 @@
             if (!resultContainer) return;
 
             if (deals.length === 0) {
-                resultContainer.innerHTML = `<div style="padding: 1rem; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; margin-bottom: 1rem; font-size: 0.875rem;">No deals to aggregate — ${mode === 'selected' ? 'select at least one deal first' : 'no deals match the current filters'}.</div>`;
+                resultContainer.innerHTML = `<div style="padding: 0.65rem; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; margin-bottom: 0.6rem; font-size: 0.875rem;">No deals to aggregate — ${mode === 'selected' ? 'select at least one deal first' : 'no deals match the current filters'}.</div>`;
                 return;
             }
 
@@ -7168,12 +7201,12 @@
             const cat7 = aggregateCategoryData(deals, 'categories');
 
             resultContainer.innerHTML = `
-                <div style="padding: 1.25rem 1.5rem; background: #EFF6FF; border: 2px solid #93C5FD; border-radius: 8px; margin-bottom: 1.25rem;">
+                <div style="padding: 0.85rem 1.1rem; background: #EFF6FF; border: 2px solid #93C5FD; border-radius: 8px; margin-bottom: 0.75rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.75rem;">
                         <h3 style="margin: 0; font-size: 1rem; color: var(--primary);">Aggregate: ${deals.length} Deal${deals.length !== 1 ? 's' : ''} ${mode === 'selected' ? '(Selected)' : '(All Visible)'}</h3>
                         <button class="btn-secondary btn-sm" onclick="document.getElementById('closedDealsAggregateResult').innerHTML = ''">✕ Close</button>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; margin-bottom: 1.25rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; margin-bottom: 0.75rem;">
                         <div style="background: white; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.75rem;"><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Total Investment</div><div style="font-weight: 700;">$${formatNumber(totalInvestment)}</div></div>
                         <div style="background: white; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.75rem;"><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Total Cost</div><div style="font-weight: 700;">$${formatNumber(totalCost)}</div></div>
                         <div style="background: white; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.75rem;"><div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Margin</div><div style="font-weight: 700; color: ${getMarginColor(marginPercent)};">$${formatNumber(marginDollar)} (${marginPercent.toFixed(1)}%)</div></div>
@@ -8974,7 +9007,7 @@
             if (!container) return; // Not on the right screen
             
             if (platformAllocations.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No platforms added yet. Click "Add Platform" to get started.</p>';
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 0.65rem;">No platforms added yet. Click "Add Platform" to get started.</p>';
                 if (validation) validation.style.display = 'none';
                 return;
             }
@@ -8983,7 +9016,7 @@
             const isBrandedContent = currentPackage.type === 'branded';
             
             container.innerHTML = platformAllocations.map(allocation => `
-                <div style="background: var(--background); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
+                <div style="background: var(--background); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem; margin-bottom: 0.75rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                         <strong style="color: var(--primary);">${allocation.platform || 'New Platform'}</strong>
                         <button type="button" onclick="removePlatformAllocation('${allocation.id}')" 
@@ -9230,14 +9263,14 @@
             if (!container) return;
             
             if (blendedPlatformAllocations.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.875rem;">No platforms added yet.</p>';
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 0.65rem; font-size: 0.875rem;">No platforms added yet.</p>';
                 return;
             }
             
             const isBrandedContent = currentPackage.type === 'branded-blended';
             
             container.innerHTML = blendedPlatformAllocations.map(allocation => `
-                <div style="background: var(--background); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
+                <div style="background: var(--background); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem; margin-bottom: 0.75rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                         <strong style="color: var(--primary);">${allocation.platform || 'New Platform'}</strong>
                         <button type="button" onclick="removeBlendedPlatformAllocation('${allocation.id}')" 
@@ -10089,8 +10122,8 @@
             
             // Build summary cards HTML with gray-blue unified design
             let summaryHTML = `
-                <div style="background: linear-gradient(to right, #E2E8F0 0%, #F1F5F9 100%); padding: 1rem 1.25rem; border-radius: 8px; margin: 0 0 1.5rem 0; border: 2px solid #CBD5E1; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);">
-                    <div style="margin-bottom: 1rem;">
+                <div style="background: linear-gradient(to right, #E2E8F0 0%, #F1F5F9 100%); padding: 0.65rem 1rem; border-radius: 8px; margin: 0 0 1.5rem 0; border: 2px solid #CBD5E1; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);">
+                    <div style="margin-bottom: 0.6rem;">
                         <h3 style="margin: 0; color: #1e293b; font-size: 1.1rem; font-weight: 700;">Package Summary</h3>
                         <p style="margin: 0.25rem 0 0 0; color: #475569; font-size: 0.85rem;">Combined totals across all ${packages.length} package${packages.length !== 1 ? 's' : ''} in this version</p>
                     </div>
@@ -10188,7 +10221,7 @@
                     }
                     
                     return `
-                        <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.95); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.5);">
+                        <div style="margin-bottom: 0.6rem; padding: 0.65rem; background: rgba(255, 255, 255, 0.95); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.5);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0;">
                                 <strong style="font-size: 15px; color: #0057B8; font-weight: 600;">${labels[key]}</strong>
                                 ${countText ? `<span class="badge" style="padding: 4px 10px; background: rgba(0, 87, 184, 0.1); color: #0057B8; border-radius: 4px; font-size: 11px; font-weight: 500;">${countText}</span>` : ''}
@@ -10284,7 +10317,7 @@
             if (categoryHTML) {
                 // Append breakdown to the summary HTML (integrate inside the gray-blue container)
                 const breakdownHTML = `
-                    <div style="margin-top: 1.5rem; padding-top: 0.75rem; border-top: 1px solid #CBD5E1;">
+                    <div style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid #CBD5E1;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                             <h4 style="margin: 0; font-size: 14px; color: #1e293b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Investment Category Breakdown</h4>
                             <button class="btn-secondary btn-sm" onclick="toggleCategoryBreakdown()" id="toggleCategoryBtn" style="background: white; border: 1px solid #94A3B8; color: #475569;">
@@ -10308,7 +10341,7 @@
             
             // Add section header for packages
             let packagesHTML = `
-                <div style="margin: 2.5rem 0 1.5rem 0; padding-bottom: 0.75rem; border-bottom: 2px solid #e2e8f0;">
+                <div style="margin: 1.25rem 0 0.75rem 0; padding-bottom: 0.75rem; border-bottom: 2px solid #e2e8f0;">
                     <h3 style="margin: 0; color: #334155; font-size: 1.25rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem;">
                         <span style="font-size: 1.5rem; display:inline-flex; align-items:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative;top:-1px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
                         Individual Packages
@@ -10395,7 +10428,7 @@
                         </div>
                     </div>
                     
-                    <div class="summary-grid" style="margin-top: 1rem;">
+                    <div class="summary-grid" style="margin-top: 0.6rem;">
                         ${pkg.type === 'added-value' ? `
                             <!-- Added Value Package Display -->
                             <div class="summary-card">
@@ -10496,7 +10529,7 @@
                         
                         if (showCallout) {
                             return `
-                            <div style="margin-top: 1rem;">
+                            <div style="margin-top: 0.6rem;">
                                 <span class="badge" style="background: rgba(15, 23, 42, 0.1); color: var(--text); text-transform: none;">
                                     ${calloutLabel}${mediaInvestmentPercent !== null ? ' ' + mediaInvestmentPercent.toFixed(6) + '%' : ''}
                                 </span>
@@ -10509,16 +10542,16 @@
                     })()}
                     
                     ${isSimplePackage ? `
-                    <div style="margin-top: 1.5rem;">
+                    <div style="margin-top: 0.85rem;">
                         <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.75rem;">
                             <button class="btn-secondary btn-sm" onclick="togglePackageDetails(${index})" id="togglePkgBtn${index}">
                                 ▼ Show Details
                             </button>
                         </div>
                         <div id="packageDetails${index}" style="display: none;">
-                            <div style="background: var(--background); padding: 1rem; border-radius: 8px; font-size: 0.875rem; text-align: left;">
+                            <div style="background: var(--background); padding: 0.65rem; border-radius: 8px; font-size: 0.875rem; text-align: left;">
                                 ${pkg.type === 'sponsorship' && pkg.sponsorshipType === 'detailed' && pkg.sponsorshipLineItems ? `
-                                    <div style="margin-bottom: 1rem;">
+                                    <div style="margin-bottom: 0.6rem;">
                                         <strong style="display: block; margin-bottom: 0.75rem; font-size: 1rem; color: var(--primary);">Line Items (${pkg.sponsorshipLineItems.length})</strong>
                                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                                             ${pkg.sponsorshipLineItems.map((item, idx) => {
@@ -10681,7 +10714,7 @@
                     ` : ''}
                     
                     ${hasMedia ? `
-                    <div style="margin-top: 1.5rem;">
+                    <div style="margin-top: 0.85rem;">
                         <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
                             ${pkg.platformAllocations.map(p => `
                                 <span class="badge badge-primary">${p.platform} ${p.percentage}%</span>
@@ -10695,7 +10728,7 @@
                         
                         <div id="mediaDetails${index}" style="display: none;">
                             ${hasTalent ? `
-                            <div style="margin-bottom: 1rem;">
+                            <div style="margin-bottom: 0.6rem;">
                                 <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Production & Talent</strong>
                                 <div style="border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
                                     <table style="margin: 0;">
@@ -10720,7 +10753,7 @@
                             </div>
                             ` : ''}
                             
-                            <div style="margin-top: 1rem;">
+                            <div style="margin-top: 0.6rem;">
                                 <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Media</strong>
                                 <div style="border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
                                     <table style="margin: 0;">
@@ -10752,7 +10785,7 @@
                                 </div>
                             </div>
 
-                            <div style="margin-top: 1rem;">
+                            <div style="margin-top: 0.6rem;">
                                 <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Media Placement Details</strong>
                                 <div class="table-container">
                                     <table>
@@ -10794,7 +10827,7 @@
                             </div>
                             
                             ${pkg.url ? `
-                            <div style="margin-top: 1rem; padding: 0.75rem; background: var(--background); border-radius: 8px; text-align: left;">
+                            <div style="margin-top: 0.6rem; padding: 0.75rem; background: var(--background); border-radius: 8px; text-align: left;">
                                 <strong style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Reference URL</strong>
                                 <a href="${escapeHtml(pkg.url)}" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-size: 0.875rem; word-break: break-all;">
                                     ${escapeHtml(pkg.url)} ↗
@@ -10803,9 +10836,9 @@
                             ` : ''}
                             
                             ${pkg.notes ? `
-                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: left;">
+                            <div style="margin-top: 0.6rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: left;">
                                 <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Notes</strong>
-                                <div style="background: var(--background); padding: 1rem; border-radius: 8px; font-size: 0.875rem; white-space: pre-wrap; text-align: left; text-indent: 0; display: block;">${escapeHtml((pkg.notes || "").trim())}
+                                <div style="background: var(--background); padding: 0.65rem; border-radius: 8px; font-size: 0.875rem; white-space: pre-wrap; text-align: left; text-indent: 0; display: block;">${escapeHtml((pkg.notes || "").trim())}
                                 </div>
                             </div>
                             ` : ''}
@@ -10814,7 +10847,7 @@
                     ` : ''}
                     
                     ${hasTalent && !hasMedia && pkg.type === 'talent' ? `
-                    <div style="margin-top: 1.5rem;">
+                    <div style="margin-top: 0.85rem;">
                         <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.75rem;">
                             <button class="btn-secondary btn-sm" onclick="toggleTalentDetails(${index})" id="toggleTalentBtn${index}">
                                 ▼ Show Details
@@ -10843,7 +10876,7 @@
                             </div>
                             
                             ${pkg.url ? `
-                            <div style="margin-top: 1rem; padding: 0.75rem; background: var(--background); border-radius: 8px; text-align: left;">
+                            <div style="margin-top: 0.6rem; padding: 0.75rem; background: var(--background); border-radius: 8px; text-align: left;">
                                 <strong style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Reference URL</strong>
                                 <a href="${escapeHtml(pkg.url)}" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-size: 0.875rem; word-break: break-all;">
                                     ${escapeHtml(pkg.url)} ↗
@@ -10852,9 +10885,9 @@
                             ` : ''}
                             
                             ${pkg.notes ? `
-                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: left;">
+                            <div style="margin-top: 0.6rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: left;">
                                 <strong style="font-size: 0.875rem; color: var(--primary); display: block; margin-bottom: 0.5rem;">Notes</strong>
-                                <div style="background: var(--background); padding: 1rem; border-radius: 8px; font-size: 0.875rem; white-space: pre-wrap; text-align: left; text-indent: 0; display: block;">${escapeHtml((pkg.notes || "").trim())}
+                                <div style="background: var(--background); padding: 0.65rem; border-radius: 8px; font-size: 0.875rem; white-space: pre-wrap; text-align: left; text-indent: 0; display: block;">${escapeHtml((pkg.notes || "").trim())}
                                 </div>
                             </div>
                             ` : ''}
@@ -10863,7 +10896,7 @@
                     ` : ''}
 
                     ${pkg.type === 'brand-funded-content' ? `
-                    <div style="margin-top: 1.5rem;">
+                    <div style="margin-top: 0.85rem;">
                         <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.75rem;">
                             <button class="btn-secondary btn-sm" onclick="toggleBrandFundedDetails(${index})" id="toggleBrandFundedBtn${index}">
                                 ▼ Show Details
@@ -10892,7 +10925,7 @@
                             </div>
 
                             ${pkg.url ? `
-                            <div style="margin-top: 1rem; padding: 0.75rem; background: var(--background); border-radius: 8px; text-align: left;">
+                            <div style="margin-top: 0.6rem; padding: 0.75rem; background: var(--background); border-radius: 8px; text-align: left;">
                                 <strong style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Reference URL</strong>
                                 <a href="${escapeHtml(pkg.url)}" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-size: 0.875rem; word-break: break-all;">
                                     ${escapeHtml(pkg.url)} ↗
@@ -10901,9 +10934,9 @@
                             ` : ''}
 
                             ${pkg.notes ? `
-                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: left;">
+                            <div style="margin-top: 0.6rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: left;">
                                 <strong style="font-size: 0.875rem; color: var(--primary); display: block; margin-bottom: 0.5rem;">Notes</strong>
-                                <div style="background: var(--background); padding: 1rem; border-radius: 8px; font-size: 0.875rem; white-space: pre-wrap; text-align: left; text-indent: 0; display: block;">${escapeHtml((pkg.notes || "").trim())}
+                                <div style="background: var(--background); padding: 0.65rem; border-radius: 8px; font-size: 0.875rem; white-space: pre-wrap; text-align: left; text-indent: 0; display: block;">${escapeHtml((pkg.notes || "").trim())}
                                 </div>
                             </div>
                             ` : ''}
@@ -11466,7 +11499,7 @@
 <style>
   body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f8f9fa; }
   .card { background: white; border-radius: 12px; padding: 3rem; max-width: 480px; width: 90%; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.1); }
-  .logo { color: #001A6E; font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; letter-spacing: 0.05em; }
+  .logo { color: #001A6E; font-size: 1.5rem; font-weight: 700; margin-bottom: 0.6rem; letter-spacing: 0.05em; }
   .spinner { width: 48px; height: 48px; border: 4px solid #e5e7eb; border-top-color: #001A6E; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
   h2 { color: #001A6E; margin: 0 0 0.75rem; font-size: 1.25rem; }
@@ -11782,7 +11815,7 @@
                             <div style="margin-bottom: 0.75rem;">
                                 <strong>Project Name:</strong> "${importedProject.projectName}"
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.875rem;">
                                 <div>
                                     <div style="font-weight: 600; color: var(--accent); margin-bottom: 0.25rem;">Currently Open:</div>
                                     <div>${existingVersionCount} version${existingVersionCount !== 1 ? 's' : ''}</div>
@@ -11874,7 +11907,7 @@
                                 <div style="margin-bottom: 0.75rem;">
                                     <strong>Project Name:</strong> "${importedProject.projectName}"
                                 </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.875rem;">
                                     <div>
                                         <div style="font-weight: 600; color: var(--accent); margin-bottom: 0.25rem;">Currently Open:</div>
                                         <div>${existingVersionCount} version${existingVersionCount !== 1 ? 's' : ''}</div>
@@ -12018,7 +12051,7 @@
                 sponsorshipTab = document.createElement('button');
                 sponsorshipTab.id = 'sponsorshipDetailsTab';
                 sponsorshipTab.onclick = () => switchSummaryTab('sponsorshipDetails');
-                sponsorshipTab.style.cssText = 'padding: 0.75rem 1.5rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer;';
+                sponsorshipTab.style.cssText = 'padding: 0.6rem 1.25rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer;';
                 sponsorshipTab.textContent = 'Sponsorship Details';
                 tabContainer.appendChild(sponsorshipTab);
             } else if (!hasDetailedSponsorships && sponsorshipTab) {
@@ -12037,7 +12070,7 @@
 
             
             let html = `
-                <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid var(--border);">
+                <div style="background: var(--background); padding: 0.65rem; border-radius: 8px; margin-bottom: 0.6rem; border: 1px solid var(--border);">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr><td style="padding: 0.5rem; font-weight: bold; width: 200px;">Agency:</td><td style="padding: 0.5rem;">${currentProject?.agencyName || 'N/A'}</td></tr>
                         <tr><td style="padding: 0.5rem; font-weight: bold;">Account:</td><td style="padding: 0.5rem;">${currentProject?.account || 'N/A'}</td></tr>
@@ -12049,8 +12082,8 @@
                     </table>
                 </div>
                 
-                <h3 style="color: var(--primary); margin: 2rem 0 1rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">OVERALL TOTALS</h3>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); margin: 1rem 0 0.6rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">OVERALL TOTALS</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 0.6rem;">
                     <thead>
                         <tr style="background: var(--background); border-bottom: 2px solid var(--border);">
                             <th style="padding: 0.75rem; text-align: left; font-weight: bold;">Metric</th>
@@ -12081,7 +12114,7 @@
             const categoriesWithData = Object.values(categories).filter(cat => cat.investment > 0 || cat.cost > 0);
             
             if (categoriesWithData.length > 0) {
-                html += `<h3 style="color: var(--primary); margin: 2rem 0 1rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">INVESTMENT CATEGORY BREAKDOWN</h3>`;
+                html += `<h3 style="color: var(--primary); margin: 1rem 0 0.6rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">INVESTMENT CATEGORY BREAKDOWN</h3>`;
                 
                 categoriesWithData.forEach(cat => {
                     const cpm = cat.impressions > 0 ? (cat.investment / cat.impressions * 1000) : 0;
@@ -12092,7 +12125,7 @@
                     const countText = cat.count > 0 ? ` (${cat.count} package${cat.count > 1 ? 's' : ''})` : '';
                     
                     html += `
-                        <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid var(--accent);">
+                        <div style="background: var(--background); padding: 0.65rem; border-radius: 8px; margin-bottom: 0.6rem; border-left: 4px solid var(--accent);">
                             <h4 style="margin: 0 0 1rem; color: var(--text); font-size: 1.1rem;">${cat.label}${countText}</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 ${cat.label === 'Added Value' ? `
@@ -12181,7 +12214,7 @@
             const totalMarginPercent = totalInvestment > 0 ? (totalMarginDollar / totalInvestment) * 100 : 0;
 
             return `
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 0.85rem;">
                     <thead>
                         <tr style="background: var(--background); border-bottom: 2px solid var(--border);">
                             <th style="padding: 0.75rem; text-align: left; font-weight: bold;">Category</th>
@@ -12336,7 +12369,7 @@
         function renderPackageDetailsTab() {
             const packages = currentVersion.packages;
             
-            let html = '<h3 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">PACKAGE DETAILS</h3>';
+            let html = '<h3 style="color: var(--primary); margin-bottom: 0.6rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">PACKAGE DETAILS</h3>';
             
             packages.forEach((pkg, index) => {
                 const hasMedia = (pkg.platformAllocations && pkg.platformAllocations.length > 0) || (pkg.blendedPlatforms && pkg.blendedPlatforms.length > 0);
@@ -12380,7 +12413,7 @@
                 }
                 
                 html += `
-                    <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid var(--primary);">
+                    <div style="background: var(--background); padding: 0.65rem; border-radius: 8px; margin-bottom: 0.6rem; border-left: 4px solid var(--primary);">
                         <h4 style="margin: 0 0 1rem; color: var(--primary); font-size: 1.15rem; font-weight: bold;">${index + 1}. ${escapeHtml(pkg.title)}</h4>
                         
                         <table style="width: 100%; border-collapse: collapse; margin-bottom: ${(hasMedia || hasTalent || pkg.blendedPlatforms || pkg.notes) ? '1.5rem' : '0'};">
@@ -12523,7 +12556,7 @@
                     }
                     
                     html += `
-                        <div style="background: rgba(59, 130, 246, 0.05); padding: 0.75rem; border-radius: 6px; border-left: 3px solid var(--accent); margin-top: 1.5rem;">
+                        <div style="background: rgba(59, 130, 246, 0.05); padding: 0.75rem; border-radius: 6px; border-left: 3px solid var(--accent); margin-top: 0.85rem;">
                             <strong style="color: var(--accent); font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">Notes:</strong>
                             <div style="font-size: 0.875rem; color: var(--text); white-space: pre-wrap;">${notesContent || 'No notes provided.'}</div>
                         </div>
@@ -12632,7 +12665,7 @@
             // FIRST TABLE: PLACEMENT BREAKDOWN (only show if we have regular placements)
             if (placements.length > 0) {
             html += `
-                <h3 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">CUSTOM CREATIVE PLACEMENT BREAKDOWN</h3>
+                <h3 style="color: var(--primary); margin-bottom: 0.6rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">CUSTOM CREATIVE PLACEMENT BREAKDOWN</h3>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
                         <thead>
@@ -12727,7 +12760,7 @@
             }));
             
             html += `
-                <h3 style="color: var(--primary); margin: 3rem 0 1rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">CUSTOM CREATIVE PLATFORM BREAKDOWN</h3>
+                <h3 style="color: var(--primary); margin: 1rem 0 0.6rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">CUSTOM CREATIVE PLATFORM BREAKDOWN</h3>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
                         <thead>
@@ -12810,7 +12843,7 @@
                 
                 if (sponsorshipPaidMedia.length > 0) {
                     html += `
-                        <h3 style="color: var(--primary); margin: 3rem 0 1rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">SPONSORSHIP PAID MEDIA</h3>
+                        <h3 style="color: var(--primary); margin: 1rem 0 0.6rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">SPONSORSHIP PAID MEDIA</h3>
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
                                 <thead>
@@ -12876,12 +12909,12 @@
                 return '<p>No sponsorship line items available.</p>';
             }
             
-            let html = '<h3 style="color: var(--primary); margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">SPONSORSHIP LINE ITEMS</h3>';
+            let html = '<h3 style="color: var(--primary); margin-bottom: 0.85rem; font-size: 1.3rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">SPONSORSHIP LINE ITEMS</h3>';
             
             // Show each sponsorship package
             sponsorships.forEach((pkg, pkgIdx) => {
                 html += `
-                    <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid var(--primary);">
+                    <div style="background: var(--background); padding: 0.65rem; border-radius: 8px; margin-bottom: 0.6rem; border-left: 4px solid var(--primary);">
                         <h4 style="margin: 0 0 1rem; color: var(--primary); font-size: 1.15rem; font-weight: bold;">${escapeHtml(pkg.title)}</h4>
                         
                         <div style="overflow-x: auto;">
@@ -12965,7 +12998,7 @@
                 const pkgCats = makeEmptyInvestmentBreakdownCats();
                 pkg.sponsorshipLineItems.forEach(item => categorizeSponsorshipLineItem(item, pkgCats));
                 html += `
-                        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                        <div style="margin-top: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--border);">
                             <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Investment Breakdown</strong>
                             ${investmentBreakdownTableHTML(pkgCats, true)}
                         </div>
@@ -12996,7 +13029,7 @@
                 const newTab = document.createElement('button');
                 newTab.id = 'sponsorshipDetailsTab';
                 newTab.onclick = () => switchSummaryTab('sponsorshipDetails');
-                newTab.style.cssText = 'padding: 0.75rem 1.5rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer;';
+                newTab.style.cssText = 'padding: 0.6rem 1.25rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer;';
                 newTab.textContent = 'Sponsorship Details';
                 tabContainer.appendChild(newTab);
             } else if (!isDetailedSponsorship && sponsorshipTab) {
@@ -15160,7 +15193,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                 
                 container.innerHTML = `
                     <div class="table-section-title">${title} - Blended Social Packages</div>
-                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.875rem; line-height: 1.6;">
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 0.65rem; margin-bottom: 0.85rem; font-size: 0.875rem; line-height: 1.6;">
                         <strong style="color: #856404;">⚠️ Important:</strong> These Media %s pertain to only Blended Social Packages. Use Blended Social Packages only when Sales agrees that the client will never want to see the Talent & Production fee broken out. Otherwise, use the same budgeting methodology as you would if the Production and Talent Fees were broken out.
                     </div>
                     ${generateTable(blendedData)}
@@ -15168,14 +15201,14 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                     <div class="table-section-title" style="margin-top: 2.5rem;">${title} - Cost Plus Budgeting</div>
                     ${generateTable(brokenData)}
                     
-                    <button class="btn-secondary" onclick="copyLookupTable()" style="margin-top: 1rem;">📋 Copy Tables</button>
+                    <button class="btn-secondary" onclick="copyLookupTable()" style="margin-top: 0.6rem;">📋 Copy Tables</button>
                 `;
             } else {
                 // Normal display for all other combinations
                 container.innerHTML = `
                     <div class="table-section-title">${title} - ${presentationType}</div>
                     ${generateTable(data)}
-                    <button class="btn-secondary" onclick="copyLookupTable()" style="margin-top: 1rem;">📋 Copy Table</button>
+                    <button class="btn-secondary" onclick="copyLookupTable()" style="margin-top: 0.6rem;">📋 Copy Table</button>
                 `;
             }
         }
@@ -15193,7 +15226,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                 <div class="table-section-title">Paramount Produced</div>
                 ${generateTable(LOOKUP_TABLES.influence.paramountProduced)}
                 
-                <button class="btn-secondary" onclick="copyLookupTable()" style="margin-top: 1rem;">📋 Copy All Tables</button>
+                <button class="btn-secondary" onclick="copyLookupTable()" style="margin-top: 0.6rem;">📋 Copy All Tables</button>
             `;
         }
 
@@ -16427,11 +16460,11 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             }
             
             return `
-                <div class="summary-card" data-line-item="${idx}" style="padding: 1.25rem; border: 2px solid var(--border); position: relative;">
+                <div class="summary-card" data-line-item="${idx}" style="padding: 0.85rem; border: 2px solid var(--border); position: relative;">
                     <button onclick="deleteLineItem(${idx})" class="btn-danger btn-sm" style="position: absolute; top: 1rem; right: 1rem;">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:1px;position:relative;top:-1px;"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><rect x="5" y="6" width="14" height="15" rx="2"/><path d="M10 11v5"/><path d="M14 11v5"/></svg> Delete
                     </button>
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; padding-right: 7rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.6rem; padding-right: 7rem;">
                         <div style="flex: 1;">
                             <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
                                 ${item.platform || 'Line Item ' + (idx + 1)}${item.package ? ' - ' + item.package : ''}
@@ -16448,7 +16481,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                         </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; padding: 0.75rem; background: var(--surface); border-radius: 4px; margin-bottom: 1rem;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; padding: 0.75rem; background: var(--surface); border-radius: 4px; margin-bottom: 0.6rem;">
                         <div>
                             <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Cost Method</div>
                             <select id="costMethod_${idx}" onchange="updateLineItemCostMethod(${idx}, this.value)" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.875rem; font-weight: 600; width: 100%;">
@@ -16468,7 +16501,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                         </div>
                     </div>
                     
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Placement Type <span class="required">*</span></label>
                         <select id="placementType_${idx}" onchange="updateLineItemType(${idx}, this.value)" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.875rem;">
                             <option value="">-- Select Type --</option>
@@ -16493,7 +16526,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                         <!-- Cost inputs will be dynamically added based on type -->
                     </div>
                     
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Notes (Optional)</label>
                         <textarea id="lineItemNotes_${idx}" onchange="updateLineItemNotes(${idx}, this.value)" placeholder="Add any notes about this placement..." style="width: 100%; min-height: 60px; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 0.875rem; font-family: inherit; resize: vertical;">${item.notes || ''}</textarea>
                     </div>
@@ -16533,7 +16566,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             if (type === 'TALENT_PRODUCTION' || type === 'EXPERIENTIAL_BUILDOUT' || type === 'INTEGRATION_BUILDOUT') {
                 // Talent cost only
                 inputsHTML = `
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Talent & Production Cost</label>
                         <div class="input-group">
                             <span class="input-addon">$</span>
@@ -16544,7 +16577,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             } else if (type === 'PAID_MEDIA') {
                 // Media cost only
                 inputsHTML = `
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Media Cost (CPM or CPV)</label>
                         <div class="input-group">
                             <span class="input-addon">$</span>
@@ -16562,14 +16595,14 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             } else if (type === 'CUSTOM_SOCIAL') {
                 // Both talent and media
                 inputsHTML = `
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Talent & Production Cost</label>
                         <div class="input-group">
                             <span class="input-addon">$</span>
                             <input type="text" id="talentCost_${idx}" oninput="formatCurrencyLive(event); updateLineItemCost(${idx});" placeholder="0.00" value="0">
                         </div>
                     </div>
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Media Cost (CPM or CPV)</label>
                         <div class="input-group">
                             <span class="input-addon">$</span>
@@ -16587,7 +16620,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             } else if (type === 'SOCIAL_VIDEO') {
                 // Rev share
                 inputsHTML = `
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Rev Share %</label>
                         <div class="input-group">
                             <input type="number" id="revShare_${idx}" step="1" min="0" max="100" placeholder="50" value="50" oninput="updateLineItemCost(${idx});" style="width: 150px;">
@@ -16598,7 +16631,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             } else if (type === 'ADDED_VALUE') {
                 // Added Value sub-type
                 inputsHTML = `
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Added Value Type</label>
                         <select id="addedValueSubType_${idx}" onchange="updateAddedValueType(${idx}, this.value)" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
                             <option value="">-- Select Type --</option>
@@ -16615,7 +16648,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             } else if (type === 'BRAND_FUNDED_CONTENT') {
                 // Brand Funded Content: cost always equals investment (0% margin), no cost input needed
                 inputsHTML = `
-                    <div style="padding: 0.75rem 1rem; background: var(--background); border-radius: 6px; font-size: 0.8125rem; color: var(--text-muted);">
+                    <div style="padding: 0.5rem 0.75rem; background: var(--background); border-radius: 6px; font-size: 0.8125rem; color: var(--text-muted);">
                         Cost automatically equals the Net Cost for Brand Funded Content (0% margin).
                     </div>
                 `;
@@ -16675,7 +16708,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
             let inputsHTML = '';
             if (subType === 'talent') {
                 inputsHTML = `
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Talent & Production Cost</label>
                         <div class="input-group">
                             <span class="input-addon">$</span>
@@ -16685,7 +16718,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                 `;
             } else if (subType === 'distribution') {
                 inputsHTML = `
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.6rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem;">Media Cost (CPM or CPV)</label>
                         <div class="input-group">
                             <span class="input-addon">$</span>
@@ -17084,7 +17117,7 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                     const addedValueSubType = item.addedValueSubType ? ` (${item.addedValueSubType === 'talent' ? 'Talent' : item.addedValueSubType === 'distribution' ? 'Distribution' : item.addedValueSubType === 'streaming' ? 'Streaming' : 'Other'})` : '';
                     
                     return `
-                        <div class="summary-card" style="padding: 1rem; border: 1px solid var(--border);">
+                        <div class="summary-card" style="padding: 0.65rem; border: 1px solid var(--border);">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
                                 <div style="flex: 1;">
                                     <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
@@ -17223,10 +17256,10 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
 
     <!-- Version Summary Modal -->
     <div id="packageDetailsModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto;">
-        <div style="min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+        <div style="min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 0.65rem;">
             <div style="background: white; border-radius: 12px; max-width: 1400px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                <div style="position: sticky; top: 0; background: white; padding: 1.5rem 1.5rem 0; border-bottom: 2px solid var(--border); z-index: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="position: sticky; top: 0; background: white; padding: 0.85rem 0.85rem 0; border-bottom: 2px solid var(--border); z-index: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
                         <h2 style="font-family: 'PeakSans', sans-serif; font-weight: 600; margin: 0; color: var(--primary);" id="modalPackageTitle">Media Plan Summary</h2>
                         <div style="display: flex; gap: 0.75rem; align-items: center;">
                             <button onclick="exportSummaryToExcel()" class="btn-secondary btn-sm" style="padding: 0.5rem 1rem;">📊 Export Excel</button>
@@ -17235,13 +17268,13 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
                         </div>
                     </div>
                     <div style="display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border); margin: 0 -1.5rem; padding: 0 1.5rem;">
-                        <button id="summaryTab" onclick="switchSummaryTab('summary')" style="padding: 0.75rem 1.5rem; border: none; background: none; border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: bold; cursor: pointer;">Summary</button>
-                        <button id="packageDetailsTab" onclick="switchSummaryTab('packageDetails')" style="padding: 0.75rem 1.5rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer;">Package Details</button>
-                        <button id="platformBreakdownTab" onclick="switchSummaryTab('platformBreakdown')" style="padding: 0.75rem 1.5rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer;">Paid Media</button>
-                        <button id="investmentBreakdownTab" onclick="switchSummaryTab('investmentBreakdown')" style="padding: 0.75rem 1.5rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">Investment Breakdown <span style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; background: rgba(0,10,60,0.08); color: #000a3c; border: 1px solid #000a3c; border-radius: 4px; padding: 1px 6px;">Beta</span></button>
+                        <button id="summaryTab" onclick="switchSummaryTab('summary')" style="padding: 0.6rem 1.25rem; border: none; background: none; border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: bold; cursor: pointer;">Summary</button>
+                        <button id="packageDetailsTab" onclick="switchSummaryTab('packageDetails')" style="padding: 0.6rem 1.25rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer;">Package Details</button>
+                        <button id="platformBreakdownTab" onclick="switchSummaryTab('platformBreakdown')" style="padding: 0.6rem 1.25rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer;">Paid Media</button>
+                        <button id="investmentBreakdownTab" onclick="switchSummaryTab('investmentBreakdown')" style="padding: 0.6rem 1.25rem; border: none; background: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">Investment Breakdown <span style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; background: rgba(0,10,60,0.08); color: #000a3c; border: 1px solid #000a3c; border-radius: 4px; padding: 1px 6px;">Beta</span></button>
                     </div>
                 </div>
-                <div id="packageDetailsContent" style="padding: 2rem;">
+                <div id="packageDetailsContent" style="padding: 0.65rem;">
                     <!-- Content will be inserted here -->
                 </div>
             </div>
