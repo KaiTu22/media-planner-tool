@@ -3610,18 +3610,35 @@
                 </div>
 
                 <div class="section-header">Placements</div>
+
+                <div id="hubMenuPicker" style="display:none; background:var(--background); border:1px solid var(--border); border-radius:8px; padding:0.75rem; margin-bottom:0.6rem;">
+                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                        <select id="hubMenuCategorySelect" onchange="onHubMenuCategoryChange()" style="min-width:180px;">
+                            <option value="">Select a category...</option>
+                        </select>
+                        <select id="hubMenuItemSelect" style="min-width:220px;">
+                            <option value="">Select a category first...</option>
+                        </select>
+                        <button class="btn-primary btn-sm" onclick="confirmAddFromMenu()">Add to Package</button>
+                        <button class="btn-secondary btn-sm" onclick="toggleHubMenuPicker(false)">Cancel</button>
+                    </div>
+                </div>
+
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Platform</th><th>Description</th><th>Size</th><th>Flight</th>
-                                <th>Cost Method</th><th>Rate</th><th>Qty</th><th>Net Cost</th><th>AV?</th><th></th>
+                                <th>Cost Method</th><th>Rate</th><th>Qty</th><th>Net Cost</th><th>Revenue Type</th><th>AV?</th><th></th>
                             </tr>
                         </thead>
                         <tbody id="hubPlacementsBody"></tbody>
                     </table>
                 </div>
-                <button class="btn-secondary btn-sm" onclick="addHubPlacementRow()" style="margin-top:0.5rem;">+ Add Placement</button>
+                <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                    <button class="btn-primary btn-sm" onclick="toggleHubMenuPicker(true)">+ Add from Menu</button>
+                    <button class="btn-secondary btn-sm" onclick="addHubPlacementRow()">+ Add Custom Line</button>
+                </div>
 
                 <div class="button-group">
                     <button class="btn-secondary" onclick="backToSponsorshipHubList()">Cancel</button>
@@ -14824,6 +14841,19 @@
         let hubPackages = [];
         let hubEditingPackageId = null;
         let hubPlacements = [];
+        let hubPlacementCategories = [];
+        let hubPlacementMenuItems = [];
+
+        // Same 14 values as calculations.js's categorizeSponsorshipLineItem —
+        // getPlacementTypeLabel (already loaded globally via calculations.js)
+        // is the single source of truth for the label text, this is just
+        // the list of valid keys for the dropdown.
+        const HUB_PLACEMENT_TYPES = [
+            'TALENT_PRODUCTION', 'PAID_MEDIA', 'CUSTOM_SOCIAL', 'DIGITAL_OO',
+            'ADD_INNOVATION', 'ADDED_VALUE', 'SOCIAL_VIDEO', 'LINEAR_OO',
+            'EXPERIENTIAL_FEE', 'EXPERIENTIAL_BUILDOUT', 'INTEGRATION_FEE',
+            'INTEGRATION_BUILDOUT', 'IP_LICENSING', 'BRAND_FUNDED_CONTENT',
+        ];
 
         async function waitForBackendCondition(checkFn, tries, delayMs) {
             tries = tries || 10;
@@ -14839,14 +14869,18 @@
             const listEl = document.getElementById('hubPackagesList');
             listEl.innerHTML = '<div class="empty-state">Loading…</div>';
             try {
-                const [shows, seasonYears, packages] = await Promise.all([
+                const [shows, seasonYears, packages, placementCategories, placementMenuItems] = await Promise.all([
                     backendJsonpRequest({ action: 'listTentpoleShows' }),
                     backendJsonpRequest({ action: 'listSeasonYears' }),
                     backendJsonpRequest({ action: 'listSponsorshipPackages' }),
+                    backendJsonpRequest({ action: 'listPlacementCategories' }),
+                    backendJsonpRequest({ action: 'listPlacementMenuItems' }),
                 ]);
                 hubShows = shows;
                 hubSeasonYears = seasonYears;
                 hubPackages = packages;
+                hubPlacementCategories = placementCategories;
+                hubPlacementMenuItems = placementMenuItems;
             } catch (err) {
                 listEl.innerHTML = `<div class="empty-state">Could not load the Sponsorship Hub: ${escapeHtml(err.message)}</div>`;
                 return;
@@ -14929,6 +14963,7 @@
             document.getElementById('hubPackageShow').value = '';
             onHubShowChange();
             renderHubPlacementsTable();
+            toggleHubMenuPicker(false);
             document.getElementById('hub-list-screen').style.display = 'none';
             document.getElementById('hub-builder-screen').style.display = 'block';
         }
@@ -14946,6 +14981,7 @@
             onHubShowChange();
             document.getElementById('hubPackageSeasonYear').value = pkg.seasonYearId || '';
             renderHubPlacementsTable();
+            toggleHubMenuPicker(false);
             document.getElementById('hub-list-screen').style.display = 'none';
             document.getElementById('hub-builder-screen').style.display = 'block';
         }
@@ -14960,8 +14996,56 @@
             hubPlacements.push({
                 platform: '', description: '', size: '', flight: '',
                 costMethod: 'CPM', rate: '', quantity: '', netCost: '', isAddedValue: false,
+                placementType: '',
             });
             renderHubPlacementsTable();
+        }
+
+        // ─── Placement Menu picker ──────────────────────────────────────────
+        function toggleHubMenuPicker(show) {
+            document.getElementById('hubMenuPicker').style.display = show ? 'block' : 'none';
+            if (show) renderHubMenuCategorySelect();
+        }
+
+        function renderHubMenuCategorySelect() {
+            const select = document.getElementById('hubMenuCategorySelect');
+            select.innerHTML = '<option value="">Select a category...</option>' +
+                hubPlacementCategories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            onHubMenuCategoryChange();
+        }
+
+        function onHubMenuCategoryChange() {
+            const categoryId = document.getElementById('hubMenuCategorySelect').value;
+            const select = document.getElementById('hubMenuItemSelect');
+            const options = hubPlacementMenuItems.filter(i => i.categoryId === categoryId);
+            select.innerHTML = (categoryId ? '<option value="">Select a placement...</option>' : '<option value="">Select a category first...</option>') +
+                options.map(i => `<option value="${i.id}">${escapeHtml(i.name)}${i.lines.length > 1 ? ' (bundle, ' + i.lines.length + ' lines)' : ''}</option>`).join('');
+        }
+
+        // Adds every line from the chosen menu item at once (a bundle is
+        // just a menu item with more than one line) — each new row inherits
+        // the category's placementType so the revenue-type rollup is
+        // correct automatically, and the line's defaultRate seeds a
+        // starting point the planner can still override per instance.
+        function confirmAddFromMenu() {
+            const categoryId = document.getElementById('hubMenuCategorySelect').value;
+            const itemId = document.getElementById('hubMenuItemSelect').value;
+            const category = hubPlacementCategories.find(c => c.id === categoryId);
+            const item = hubPlacementMenuItems.find(i => i.id === itemId);
+            if (!category || !item) {
+                customAlert('Select a category and a placement first.');
+                return;
+            }
+            item.lines.forEach(line => {
+                hubPlacements.push({
+                    platform: line.platform || '', description: line.description || '', size: line.size || '',
+                    flight: '', costMethod: line.costMethod || '', rate: line.defaultRate || '',
+                    quantity: '', netCost: '', isAddedValue: line.costMethod === 'AV',
+                    placementType: category.placementType,
+                });
+            });
+            renderHubPlacementsTable();
+            toggleHubMenuPicker(false);
         }
 
         function removeHubPlacementRow(idx) {
@@ -14984,7 +15068,7 @@
         function renderHubPlacementsTable() {
             const tbody = document.getElementById('hubPlacementsBody');
             if (hubPlacements.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);">No placements yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text-muted);">No placements yet.</td></tr>';
                 return;
             }
             tbody.innerHTML = hubPlacements.map((p, idx) => `
@@ -14998,11 +15082,18 @@
                             <option value="CPM" ${p.costMethod === 'CPM' ? 'selected' : ''}>CPM</option>
                             <option value="Flat Fee" ${p.costMethod === 'Flat Fee' ? 'selected' : ''}>Flat Fee</option>
                             <option value="AV" ${p.costMethod === 'AV' ? 'selected' : ''}>Added Value</option>
+                            <option value="" ${!p.costMethod ? 'selected' : ''}>— (bundled, no charge)</option>
                         </select>
                     </td>
                     <td><input type="number" value="${p.rate}" oninput="updateHubPlacementField(${idx}, 'rate', this.value)" style="width:80px;"></td>
                     <td><input type="number" value="${p.quantity}" oninput="updateHubPlacementField(${idx}, 'quantity', this.value)" style="width:80px;"></td>
                     <td><input type="number" value="${p.netCost}" oninput="updateHubPlacementField(${idx}, 'netCost', this.value)" style="width:90px;"></td>
+                    <td>
+                        <select onchange="updateHubPlacementField(${idx}, 'placementType', this.value)" style="min-width:150px;">
+                            <option value="" ${!p.placementType ? 'selected' : ''}>— Select —</option>
+                            ${HUB_PLACEMENT_TYPES.map(t => `<option value="${t}" ${p.placementType === t ? 'selected' : ''}>${escapeHtml(getPlacementTypeLabel(t))}</option>`).join('')}
+                        </select>
+                    </td>
                     <td style="text-align:center;"><input type="checkbox" ${p.isAddedValue ? 'checked' : ''} onchange="updateHubPlacementField(${idx}, 'isAddedValue', this.checked)"></td>
                     <td><span class="delete-icon" onclick="removeHubPlacementRow(${idx})" title="Remove placement">✕</span></td>
                 </tr>
