@@ -15062,11 +15062,18 @@
                 customAlert('Select a category and a placement first.');
                 return;
             }
+            // 'shared' bundles (confirmed 2026-09-24) price every line at
+            // one common rate instead of each line either carrying its own
+            // rate or showing as $0 — the rate/cost method come from the
+            // item itself, not from each individual line, in that mode.
+            const isShared = item.rateMode === 'shared';
             item.lines.forEach(line => {
+                const costMethod = isShared ? (item.sharedCostMethod || '') : (line.costMethod || '');
+                const rate = isShared ? (item.sharedRate || '') : (line.defaultRate || '');
                 hubPlacements.push({
                     platform: line.platform || '', description: line.description || '', size: line.size || '',
-                    flight: '', costMethod: line.costMethod || '', rate: line.defaultRate || '',
-                    quantity: '', netCost: '', isAddedValue: line.costMethod === 'AV',
+                    flight: '', costMethod, rate,
+                    quantity: '', netCost: '', isAddedValue: costMethod === 'AV',
                     placementType: category.placementType,
                 });
             });
