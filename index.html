@@ -3046,10 +3046,11 @@
                     <button id="viewSummaryBtn" class="btn-accent" onclick="viewVersionSummary()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; border: 2px solid #000a3c;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative;top:-1px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> View Summary</button>
                     <button onclick="showExternalPlanModal()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; background: #001A6E; color: #ffffff; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Generate External Plan</button>
                     <div style="flex: 1;"></div>
+                    <button class="btn-secondary" onclick="showAttachFromHubPicker()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem;">Attach from Sponsorship Hub</button>
                     <button class="btn-primary" onclick="addAnotherPackage()" style="padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; border: 2px solid #d9dae2; margin-right: 1rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Package</button>
                 </div>
             </div>
-            
+
             <div class="card">
                 <div class="card-header">
                     <h2 id="versionSummaryTitle" style="font-family: 'PeakSans', sans-serif; font-weight: 600;">Version Summary</h2>
@@ -3672,6 +3673,22 @@
             <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
                 <button class="btn-secondary" onclick="cancelRename()">Cancel</button>
                 <button id="renameBtn" class="btn-primary" onclick="acceptRename()">Rename</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attach from Sponsorship Hub Dialog -->
+    <div id="attachHubDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 0.85rem; border-radius: 12px; max-width: 640px; width: 90%; max-height: 80vh; overflow-y: auto; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 style="margin-bottom: 0.6rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600;">Attach from Sponsorship Hub</h3>
+            <div style="margin-bottom: 0.6rem;">
+                <select id="attachHubShowFilter" onchange="renderAttachHubPackagesList()" style="width: 100%;">
+                    <option value="">All Shows / Franchises</option>
+                </select>
+            </div>
+            <div id="attachHubPackagesList"></div>
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.75rem;">
+                <button class="btn-secondary" onclick="closeAttachFromHubPicker()">Cancel</button>
             </div>
         </div>
     </div>
@@ -15079,6 +15096,168 @@
             });
             renderHubPlacementsTable();
             toggleHubMenuPicker(false);
+        }
+
+        // ─── Attach from Sponsorship Hub (into a project's version) ────────
+        // Copy, not link (confirmed architecture decision) — once attached,
+        // editing this package never touches the Hub's original catalog
+        // package, and later editing/archiving the Hub package never
+        // affects a version that already attached it. sourceSponsorshipId
+        // is kept purely as an inert traceability reference.
+        let attachHubShows = [];
+        let attachHubSeasonYears = [];
+        let attachHubPackages = [];
+
+        async function showAttachFromHubPicker() {
+            if (!currentProject || !currentVersion) {
+                customAlert('Open a project version first.');
+                return;
+            }
+            document.getElementById('attachHubDialog').style.display = 'flex';
+            const listEl = document.getElementById('attachHubPackagesList');
+            listEl.innerHTML = '<div class="empty-state">Loading…</div>';
+            try {
+                const [shows, seasonYears, packages] = await Promise.all([
+                    backendJsonpRequest({ action: 'listTentpoleShows' }),
+                    backendJsonpRequest({ action: 'listSeasonYears' }),
+                    backendJsonpRequest({ action: 'listSponsorshipPackages' }),
+                ]);
+                attachHubShows = shows;
+                attachHubSeasonYears = seasonYears;
+                attachHubPackages = packages.filter(p => p.status !== 'archived');
+            } catch (err) {
+                listEl.innerHTML = `<div class="empty-state">Could not load the Sponsorship Hub: ${escapeHtml(err.message)}</div>`;
+                return;
+            }
+
+            // Defaults the filter to the project's own show, if it has one
+            // set — a convenience, not a restriction (the dropdown still
+            // offers every show, since a plan can borrow a package built
+            // for a different show).
+            const defaultShowId = (currentProject.dealCategory === 'tentpole' && currentProject.tentpoleShowId) || '';
+            const filterSelect = document.getElementById('attachHubShowFilter');
+            filterSelect.innerHTML = '<option value="">All Shows / Franchises</option>' +
+                attachHubShows.map(s => `<option value="${s.id}" ${s.id === defaultShowId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('');
+
+            renderAttachHubPackagesList();
+        }
+
+        function closeAttachFromHubPicker() {
+            document.getElementById('attachHubDialog').style.display = 'none';
+        }
+
+        function getAttachHubShowName(id) {
+            const show = attachHubShows.find(s => s.id === id);
+            return show ? show.name : 'Unknown Show';
+        }
+        function getAttachHubSeasonYearName(id) {
+            const seasonYear = attachHubSeasonYears.find(s => s.id === id);
+            return seasonYear ? seasonYear.name : '';
+        }
+
+        function renderAttachHubPackagesList() {
+            const filter = document.getElementById('attachHubShowFilter').value;
+            const filtered = filter ? attachHubPackages.filter(p => p.showId === filter) : attachHubPackages;
+            const container = document.getElementById('attachHubPackagesList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state">No active sponsorship packages match this filter.</div>';
+                return;
+            }
+            container.innerHTML = filtered.map(pkg => {
+                const placementCount = (pkg.placements || []).length;
+                return `
+                    <div class="package-card">
+                        <div class="package-header">
+                            <div>
+                                <div class="package-title">${escapeHtml(pkg.name || 'Untitled Package')}</div>
+                                <div style="font-size:0.85rem;color:var(--text-muted);font-family:'Inter',sans-serif;text-transform:none;">
+                                    ${escapeHtml(getAttachHubShowName(pkg.showId))} &middot; ${escapeHtml(getAttachHubSeasonYearName(pkg.seasonYearId))} &middot; ${placementCount} placement${placementCount === 1 ? '' : 's'}
+                                </div>
+                            </div>
+                            <button class="btn-primary btn-sm" onclick="confirmAttachHubPackage('${pkg.id}')">Attach</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Maps a Hub placement (platform/description/size/flight/costMethod/
+        // rate/quantity/netCost/placementType) onto the exact sponsorshipLineItems
+        // shape the calc engine and the manual/import line-item flow already
+        // use (platform/package/description/size/flight/costMethod/rate/
+        // quantity/netCost/isGrouped/groupItems/rowIndex/placementType/
+        // addedValueSubType/talentCost/mediaCost/totalCost/margin/marginPercent)
+        // — reusing the existing categorization/rollup logic as-is rather than
+        // teaching it a new package shape.
+        function confirmAttachHubPackage(packageId) {
+            const pkg = attachHubPackages.find(p => p.id === packageId);
+            if (!pkg) return;
+
+            const lineItems = (pkg.placements || []).map((placement, idx) => {
+                const rate = parseFloat(placement.rate) || 0;
+                const quantity = parseFloat(placement.quantity) || 0;
+                const netCost = parseFloat(placement.netCost) || 0;
+                return {
+                    id: idx,
+                    platform: placement.platform || '',
+                    package: pkg.name || '',
+                    description: placement.description || '',
+                    size: placement.size || '',
+                    flight: placement.flight || '',
+                    costMethod: placement.costMethod || '',
+                    rate, quantity, netCost,
+                    isGrouped: false,
+                    groupId: null,
+                    groupItems: [],
+                    rowIndex: idx,
+                    placementType: placement.placementType || '',
+                    // The Hub's own placement editor doesn't capture which
+                    // Added Value sub-type this is yet — defaults to 'other'
+                    // (100% margin, excluded from the talent/media category
+                    // split) rather than guessing which bucket it belongs in.
+                    addedValueSubType: placement.isAddedValue ? 'other' : undefined,
+                    talentCost: 0,
+                    mediaCost: 0,
+                    totalCost: 0,
+                    margin: netCost,
+                    marginPercent: netCost > 0 ? 100 : 0,
+                    notes: '',
+                };
+            });
+
+            const totalInvestment = lineItems.reduce((sum, i) => sum + (i.netCost || 0), 0);
+
+            currentPackage = {
+                type: 'sponsorship',
+                sponsorshipType: 'detailed',
+                title: pkg.name || 'Sponsorship Package',
+                sponsorshipLineItems: lineItems,
+                totalInvestment,
+                notes: '',
+                url: '',
+                sourceSponsorshipId: pkg.id,
+            };
+            sponsorshipLineItems = lineItems;
+            sponsorshipSectionHeaders = [];
+            editingPackageIndex = -1;
+
+            closeAttachFromHubPicker();
+
+            // Same finalize steps as savePackage()'s "new package" path,
+            // minus the Final-Summary-screen notes/URL DOM reads — this
+            // attaches directly from the version summary, not from that
+            // wizard screen, so those fields just stay blank (already set
+            // above) rather than reading from inputs that aren't on screen.
+            currentVersion.packages.push({ ...currentPackage });
+            checkAndRevertVerification(currentVersion);
+            saveProjects();
+            currentPackage = {};
+            platformAllocations = [];
+            sponsorshipLineItems = [];
+            sponsorshipSectionHeaders = [];
+            hasUnsavedChanges = false;
+            displayVersionSummary();
+            showScreen('screen-6');
         }
 
         function removeHubPlacementRow(idx) {
