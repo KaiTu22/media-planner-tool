@@ -15039,7 +15039,7 @@
             hubPlacements.push({
                 platform: '', description: '', size: '', flight: '',
                 costMethod: 'CPM', rate: '', quantity: '', netCost: '', isAddedValue: false,
-                placementType: '', manualQuantity: false,
+                placementType: '', manualQuantity: false, sharedGroupId: null,
             });
             renderHubPlacementsTable();
         }
@@ -15083,7 +15083,11 @@
             // one common rate instead of each line either carrying its own
             // rate or showing as $0 — the rate/cost method come from the
             // item itself, not from each individual line, in that mode.
+            // sharedGroupId ties these rows together in the placements
+            // table so the shared Cost Method/Rate renders once (a real
+            // merged cell), not repeated identically on every row.
             const isShared = item.rateMode === 'shared';
+            const sharedGroupId = isShared ? ('shared-' + generateId()) : null;
             item.lines.forEach(line => {
                 const costMethod = isShared ? (item.sharedCostMethod || '') : (line.costMethod || '');
                 const rate = isShared ? (item.sharedRate || '') : (line.defaultRate || '');
@@ -15091,7 +15095,7 @@
                     platform: line.platform || '', description: line.description || '', size: line.size || '',
                     flight: '', costMethod, rate,
                     quantity: '', netCost: '', isAddedValue: costMethod === 'AV',
-                    placementType: category.placementType, manualQuantity: false,
+                    placementType: category.placementType, manualQuantity: false, sharedGroupId,
                 });
             });
             renderHubPlacementsTable();
@@ -15272,6 +15276,15 @@
         // derived (quantity = netCost / rate * 1000 for CPM) unless
         // manualQuantity is checked, which frees Quantity for a real
         // guaranteed-commitment number that doesn't cleanly divide out.
+        function recalcHubPlacementQuantity(p) {
+            if (p.manualQuantity) return;
+            const rate = parseFloat(p.rate);
+            const netCost = parseFloat(p.netCost);
+            if (p.costMethod === 'CPM' && rate > 0 && !isNaN(netCost)) {
+                p.quantity = Math.round((netCost / rate) * 1000);
+            }
+        }
+
         function updateHubPlacementField(idx, field, rawValue) {
             hubPlacements[idx][field] = rawValue;
             const p = hubPlacements[idx];
@@ -15279,14 +15292,24 @@
                 renderHubPlacementsTable();
                 return;
             }
-            if (!p.manualQuantity && (field === 'costMethod' || field === 'rate' || field === 'netCost')) {
-                const rate = parseFloat(p.rate);
-                const netCost = parseFloat(p.netCost);
-                if (p.costMethod === 'CPM' && rate > 0 && !isNaN(netCost)) {
-                    p.quantity = Math.round((netCost / rate) * 1000);
-                    renderHubPlacementsTable();
-                }
+            if (field === 'costMethod' || field === 'rate' || field === 'netCost') {
+                recalcHubPlacementQuantity(p);
+                renderHubPlacementsTable();
             }
+        }
+
+        // A shared-CPM bundle's Cost Method/Rate are edited once for the
+        // whole group (see the rowspan cell in renderHubPlacementsTable),
+        // not per row — every member's own Net Cost still drives its own
+        // Quantity independently against that one shared rate.
+        function updateSharedGroupField(groupId, field, value) {
+            hubPlacements.forEach(p => {
+                if (p.sharedGroupId === groupId) {
+                    p[field] = value;
+                    recalcHubPlacementQuantity(p);
+                }
+            });
+            renderHubPlacementsTable();
         }
 
         function renderHubPlacementsTable() {
@@ -15295,21 +15318,60 @@
                 tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text-muted);">No placements yet.</td></tr>';
                 return;
             }
-            tbody.innerHTML = hubPlacements.map((p, idx) => `
+
+            // Group consecutive placements sharing a sharedGroupId so their
+            // Cost Method/Rate cells render once, spanning the whole group,
+            // instead of repeating the identical value on every row.
+            const groupRunLength = {};
+            hubPlacements.forEach(p => {
+                if (p.sharedGroupId) groupRunLength[p.sharedGroupId] = (groupRunLength[p.sharedGroupId] || 0) + 1;
+            });
+            const seenGroups = new Set();
+
+            tbody.innerHTML = hubPlacements.map((p, idx) => {
+                const groupId = p.sharedGroupId;
+                const isGroupFirst = groupId && !seenGroups.has(groupId);
+                if (groupId) seenGroups.add(groupId);
+                const isGroupMember = !!groupId;
+                const rowSpan = groupId ? groupRunLength[groupId] : 1;
+
+                const costMethodSelect = (onChange) => `
+                    <select onchange="${onChange}" style="min-width:100px;">
+                        <option value="CPM" ${p.costMethod === 'CPM' ? 'selected' : ''}>CPM</option>
+                        <option value="Flat Fee" ${p.costMethod === 'Flat Fee' ? 'selected' : ''}>Flat Fee</option>
+                        <option value="AV" ${p.costMethod === 'AV' ? 'selected' : ''}>Added Value</option>
+                        <option value="" ${!p.costMethod ? 'selected' : ''}>— (bundled, no charge)</option>
+                    </select>`;
+
+                let sharedCells = '';
+                if (isGroupMember) {
+                    if (isGroupFirst) {
+                        sharedCells = `
+                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);vertical-align:top;">
+                                ${costMethodSelect(`updateSharedGroupField('${groupId}', 'costMethod', this.value)`)}
+                                <div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;">Shared across ${rowSpan} lines</div>
+                            </td>
+                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);vertical-align:top;">
+                                <input type="number" value="${p.rate}" oninput="updateSharedGroupField('${groupId}', 'rate', this.value)" style="width:80px;">
+                            </td>
+                        `;
+                    } else {
+                        sharedCells = ''; // covered by the first row's rowspan
+                    }
+                } else {
+                    sharedCells = `
+                        <td>${costMethodSelect(`updateHubPlacementField(${idx}, 'costMethod', this.value)`)}</td>
+                        <td><input type="number" value="${p.rate}" oninput="updateHubPlacementField(${idx}, 'rate', this.value)" style="width:80px;"></td>
+                    `;
+                }
+
+                return `
                 <tr>
                     <td><input type="text" value="${escapeHtml(p.platform)}" oninput="updateHubPlacementField(${idx}, 'platform', this.value)" style="width:110px;"></td>
                     <td><input type="text" value="${escapeHtml(p.description)}" oninput="updateHubPlacementField(${idx}, 'description', this.value)" style="width:160px;"></td>
                     <td><input type="text" value="${escapeHtml(p.size)}" oninput="updateHubPlacementField(${idx}, 'size', this.value)" style="width:90px;"></td>
                     <td><input type="text" value="${escapeHtml(p.flight)}" oninput="updateHubPlacementField(${idx}, 'flight', this.value)" style="width:90px;"></td>
-                    <td>
-                        <select onchange="updateHubPlacementField(${idx}, 'costMethod', this.value)" style="min-width:100px;">
-                            <option value="CPM" ${p.costMethod === 'CPM' ? 'selected' : ''}>CPM</option>
-                            <option value="Flat Fee" ${p.costMethod === 'Flat Fee' ? 'selected' : ''}>Flat Fee</option>
-                            <option value="AV" ${p.costMethod === 'AV' ? 'selected' : ''}>Added Value</option>
-                            <option value="" ${!p.costMethod ? 'selected' : ''}>— (bundled, no charge)</option>
-                        </select>
-                    </td>
-                    <td><input type="number" value="${p.rate}" oninput="updateHubPlacementField(${idx}, 'rate', this.value)" style="width:80px;"></td>
+                    ${sharedCells}
                     <td><input type="number" value="${p.netCost}" oninput="updateHubPlacementField(${idx}, 'netCost', this.value)" style="width:90px;"></td>
                     <td>
                         <input type="number" value="${p.quantity}" ${p.manualQuantity ? '' : 'disabled title="Calculated from Rate and Net Cost — check Manual Qty to override"'} oninput="updateHubPlacementField(${idx}, 'quantity', this.value)" style="width:90px;">
@@ -15326,7 +15388,8 @@
                     <td style="text-align:center;"><input type="checkbox" ${p.isAddedValue ? 'checked' : ''} onchange="updateHubPlacementField(${idx}, 'isAddedValue', this.checked)"></td>
                     <td><span class="delete-icon" onclick="removeHubPlacementRow(${idx})" title="Remove placement">✕</span></td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function saveSponsorshipPackage() {
