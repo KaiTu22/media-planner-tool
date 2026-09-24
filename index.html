@@ -15336,22 +15336,22 @@
                 const rowSpan = groupId ? groupRunLength[groupId] : 1;
 
                 const costMethodSelect = (onChange) => `
-                    <select onchange="${onChange}" style="min-width:100px;">
+                    <select onchange="${onChange}" style="min-width:150px;">
                         <option value="CPM" ${p.costMethod === 'CPM' ? 'selected' : ''}>CPM</option>
                         <option value="Flat Fee" ${p.costMethod === 'Flat Fee' ? 'selected' : ''}>Flat Fee</option>
                         <option value="AV" ${p.costMethod === 'AV' ? 'selected' : ''}>Added Value</option>
-                        <option value="" ${!p.costMethod ? 'selected' : ''}>— (bundled, no charge)</option>
+                        <option value="" ${!p.costMethod ? 'selected' : ''}>— No charge</option>
                     </select>`;
 
                 let sharedCells = '';
                 if (isGroupMember) {
                     if (isGroupFirst) {
                         sharedCells = `
-                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);vertical-align:top;">
+                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);vertical-align:middle;text-align:center;">
                                 ${costMethodSelect(`updateSharedGroupField('${groupId}', 'costMethod', this.value)`)}
-                                <div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;">Shared across ${rowSpan} lines</div>
+                                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:5px;">Shared across ${rowSpan} lines</div>
                             </td>
-                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);vertical-align:top;">
+                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);vertical-align:middle;text-align:center;">
                                 <input type="number" value="${p.rate}" oninput="updateSharedGroupField('${groupId}', 'rate', this.value)" style="width:80px;">
                             </td>
                         `;
