@@ -11449,8 +11449,12 @@
 
         // Escape HTML to prevent XSS attacks
         function escapeHtml(unsafe) {
-            if (!unsafe) return '';
-            return unsafe
+            if (unsafe === null || unsafe === undefined || unsafe === '') return '';
+            // Sheets returns a cell that looks purely numeric (e.g. a
+            // Season/Year label typed as just "2027") as an actual number,
+            // not a string — .replace() below would throw on that, so
+            // coerce first rather than assuming callers always pass a string.
+            return String(unsafe)
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
