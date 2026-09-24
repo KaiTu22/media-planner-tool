@@ -14936,6 +14936,26 @@
             }).join('');
         }
 
+        // The builder's Show/Season/Placement-menu dropdowns were only ever
+        // populated from whatever renderSponsorshipHubList() last fetched
+        // (i.e. whenever the Hub tab itself was last opened/switched to) —
+        // so anything added via Settings after that point was invisible
+        // until the tab was left and re-entered. This re-fetches fresh
+        // every time the builder actually opens, regardless of how stale
+        // the list screen's own data might be.
+        async function refreshHubLookupData() {
+            const [shows, seasonYears, placementCategories, placementMenuItems] = await Promise.all([
+                backendJsonpRequest({ action: 'listTentpoleShows' }),
+                backendJsonpRequest({ action: 'listSeasonYears' }),
+                backendJsonpRequest({ action: 'listPlacementCategories' }),
+                backendJsonpRequest({ action: 'listPlacementMenuItems' }),
+            ]);
+            hubShows = shows;
+            hubSeasonYears = seasonYears;
+            hubPlacementCategories = placementCategories;
+            hubPlacementMenuItems = placementMenuItems;
+        }
+
         function renderHubShowSelect() {
             const select = document.getElementById('hubPackageShow');
             select.innerHTML = '<option value="">Select a show...</option>' +
@@ -14953,12 +14973,13 @@
                 options.map(sy => `<option value="${sy.id}">${escapeHtml(sy.name)}</option>`).join('');
         }
 
-        function showNewSponsorshipPackageForm() {
+        async function showNewSponsorshipPackageForm() {
             hubEditingPackageId = null;
             hubPlacements = [];
             document.getElementById('hubBuilderTitle').textContent = 'New Sponsorship Package';
             document.getElementById('hubPackageName').value = '';
             document.getElementById('hubPackageStatus').value = 'active';
+            await refreshHubLookupData();
             renderHubShowSelect();
             document.getElementById('hubPackageShow').value = '';
             onHubShowChange();
@@ -14968,7 +14989,7 @@
             document.getElementById('hub-builder-screen').style.display = 'block';
         }
 
-        function editSponsorshipPackage(id) {
+        async function editSponsorshipPackage(id) {
             const pkg = hubPackages.find(p => p.id === id);
             if (!pkg) return;
             hubEditingPackageId = id;
@@ -14976,6 +14997,7 @@
             document.getElementById('hubBuilderTitle').textContent = 'Edit Sponsorship Package';
             document.getElementById('hubPackageName').value = pkg.name || '';
             document.getElementById('hubPackageStatus').value = pkg.status || 'active';
+            await refreshHubLookupData();
             renderHubShowSelect();
             document.getElementById('hubPackageShow').value = pkg.showId || '';
             onHubShowChange();
