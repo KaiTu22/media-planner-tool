@@ -3630,7 +3630,7 @@
                         <thead>
                             <tr>
                                 <th>Platform</th><th>Description</th><th>Size</th><th>Flight</th>
-                                <th>Cost Method</th><th>Rate</th><th>Qty</th><th>Net Cost</th><th>Revenue Type</th><th>AV?</th><th></th>
+                                <th>Cost Method</th><th>Rate</th><th>Net Cost</th><th>Qty (Impressions)</th><th>Revenue Type</th><th>AV?</th><th></th>
                             </tr>
                         </thead>
                         <tbody id="hubPlacementsBody"></tbody>
@@ -15039,7 +15039,7 @@
             hubPlacements.push({
                 platform: '', description: '', size: '', flight: '',
                 costMethod: 'CPM', rate: '', quantity: '', netCost: '', isAddedValue: false,
-                placementType: '',
+                placementType: '', manualQuantity: false,
             });
             renderHubPlacementsTable();
         }
@@ -15091,7 +15091,7 @@
                     platform: line.platform || '', description: line.description || '', size: line.size || '',
                     flight: '', costMethod, rate,
                     quantity: '', netCost: '', isAddedValue: costMethod === 'AV',
-                    placementType: category.placementType,
+                    placementType: category.placementType, manualQuantity: false,
                 });
             });
             renderHubPlacementsTable();
@@ -15265,13 +15265,25 @@
             renderHubPlacementsTable();
         }
 
+        // Default direction (confirmed 2026-09-24): Rate and Net Cost are
+        // the primary inputs — a planner typically already knows the target
+        // investment and the market rate, and wants the app to say how many
+        // impressions that buys, not the other way around. Quantity is
+        // derived (quantity = netCost / rate * 1000 for CPM) unless
+        // manualQuantity is checked, which frees Quantity for a real
+        // guaranteed-commitment number that doesn't cleanly divide out.
         function updateHubPlacementField(idx, field, rawValue) {
-            const value = field === 'isAddedValue' ? rawValue : rawValue;
-            hubPlacements[idx][field] = value;
-            if (field === 'costMethod' || field === 'rate' || field === 'quantity') {
-                const p = hubPlacements[idx];
-                if (p.costMethod === 'CPM' && p.rate && p.quantity) {
-                    p.netCost = (parseFloat(p.rate) * parseFloat(p.quantity) / 1000).toFixed(2);
+            hubPlacements[idx][field] = rawValue;
+            const p = hubPlacements[idx];
+            if (field === 'manualQuantity') {
+                renderHubPlacementsTable();
+                return;
+            }
+            if (!p.manualQuantity && (field === 'costMethod' || field === 'rate' || field === 'netCost')) {
+                const rate = parseFloat(p.rate);
+                const netCost = parseFloat(p.netCost);
+                if (p.costMethod === 'CPM' && rate > 0 && !isNaN(netCost)) {
+                    p.quantity = Math.round((netCost / rate) * 1000);
                     renderHubPlacementsTable();
                 }
             }
@@ -15298,8 +15310,13 @@
                         </select>
                     </td>
                     <td><input type="number" value="${p.rate}" oninput="updateHubPlacementField(${idx}, 'rate', this.value)" style="width:80px;"></td>
-                    <td><input type="number" value="${p.quantity}" oninput="updateHubPlacementField(${idx}, 'quantity', this.value)" style="width:80px;"></td>
                     <td><input type="number" value="${p.netCost}" oninput="updateHubPlacementField(${idx}, 'netCost', this.value)" style="width:90px;"></td>
+                    <td>
+                        <input type="number" value="${p.quantity}" ${p.manualQuantity ? '' : 'disabled title="Calculated from Rate and Net Cost — check Manual Qty to override"'} oninput="updateHubPlacementField(${idx}, 'quantity', this.value)" style="width:90px;">
+                        <label style="display:flex;align-items:center;gap:3px;font-size:0.7rem;color:var(--text-muted);white-space:nowrap;margin-top:2px;">
+                            <input type="checkbox" ${p.manualQuantity ? 'checked' : ''} onchange="updateHubPlacementField(${idx}, 'manualQuantity', this.checked)" style="width:auto;margin:0;"> Manual
+                        </label>
+                    </td>
                     <td>
                         <select onchange="updateHubPlacementField(${idx}, 'placementType', this.value)" style="min-width:150px;">
                             <option value="" ${!p.placementType ? 'selected' : ''}>— Select —</option>
