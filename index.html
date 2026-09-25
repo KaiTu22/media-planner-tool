@@ -731,6 +731,31 @@
             overflow-x: auto;
             margin: 0.75rem 0;  /* Density pass (confirmed 2026-09-23) */
         }
+
+        /* Sponsorship Hub placements table (confirmed 2026-09-25) — real
+           sponsorships run up to ~20 lines, so this needs its own tighter
+           scale rather than the general form-control sizing: smaller font,
+           slimmer control padding, and every cell (including a shared-CPM
+           bundle's merged rowspan cell) top-aligned so a row's fields line
+           up with each other regardless of how tall a neighboring merged
+           cell is. */
+        .hub-placements-table th,
+        .hub-placements-table td {
+            padding: 0.3rem 0.4rem;
+            vertical-align: top;
+        }
+        .hub-placements-table input,
+        .hub-placements-table select,
+        .hub-placements-table textarea {
+            font-size: 0.78rem;
+            padding: 3px 5px;
+        }
+        .hub-placements-table textarea {
+            resize: vertical;
+            overflow: auto;
+            line-height: 1.3;
+            font-family: inherit;
+        }
         
         /* Breadcrumb Navigation */
         .breadcrumb {
@@ -3626,7 +3651,7 @@
                 </div>
 
                 <div class="table-container">
-                    <table>
+                    <table class="hub-placements-table">
                         <thead>
                             <tr>
                                 <th>Platform</th><th>Description</th><th>Size</th><th>Flight</th>
@@ -15347,12 +15372,12 @@
                 if (isGroupMember) {
                     if (isGroupFirst) {
                         sharedCells = `
-                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);vertical-align:middle;text-align:center;">
+                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);text-align:center;">
                                 ${costMethodSelect(`updateSharedGroupField('${groupId}', 'costMethod', this.value)`)}
-                                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:5px;">Shared across ${rowSpan} lines</div>
+                                <div style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">Shared across ${rowSpan} lines</div>
                             </td>
-                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);vertical-align:middle;text-align:center;">
-                                <input type="number" value="${p.rate}" oninput="updateSharedGroupField('${groupId}', 'rate', this.value)" style="width:80px;">
+                            <td rowspan="${rowSpan}" style="background:var(--background-subtle);text-align:center;">
+                                <input type="number" value="${p.rate}" oninput="updateSharedGroupField('${groupId}', 'rate', this.value)" style="width:70px;">
                             </td>
                         `;
                     } else {
@@ -15361,26 +15386,36 @@
                 } else {
                     sharedCells = `
                         <td>${costMethodSelect(`updateHubPlacementField(${idx}, 'costMethod', this.value)`)}</td>
-                        <td><input type="number" value="${p.rate}" oninput="updateHubPlacementField(${idx}, 'rate', this.value)" style="width:80px;"></td>
+                        <td><input type="number" value="${p.rate}" oninput="updateHubPlacementField(${idx}, 'rate', this.value)" style="width:70px;"></td>
                     `;
                 }
 
+                // Platform/Description/Size/Flight are textareas, not plain
+                // inputs — a single-line box that just clips long text
+                // wasn't enough once real descriptions run long. rows="1"
+                // keeps them compact by default; resize:vertical (from the
+                // .hub-placements-table rule) lets the user manually drag
+                // one open to read the full text, and the title attribute
+                // shows it on hover without expanding anything.
+                const growBox = (field, value, width) =>
+                    `<textarea rows="1" title="${escapeHtml(value)}" oninput="this.title=this.value;updateHubPlacementField(${idx}, '${field}', this.value)" style="width:${width}px;">${escapeHtml(value)}</textarea>`;
+
                 return `
                 <tr>
-                    <td><input type="text" value="${escapeHtml(p.platform)}" oninput="updateHubPlacementField(${idx}, 'platform', this.value)" style="width:110px;"></td>
-                    <td><input type="text" value="${escapeHtml(p.description)}" oninput="updateHubPlacementField(${idx}, 'description', this.value)" style="width:160px;"></td>
-                    <td><input type="text" value="${escapeHtml(p.size)}" oninput="updateHubPlacementField(${idx}, 'size', this.value)" style="width:90px;"></td>
-                    <td><input type="text" value="${escapeHtml(p.flight)}" oninput="updateHubPlacementField(${idx}, 'flight', this.value)" style="width:90px;"></td>
+                    <td>${growBox('platform', p.platform, 95)}</td>
+                    <td>${growBox('description', p.description, 150)}</td>
+                    <td>${growBox('size', p.size, 70)}</td>
+                    <td>${growBox('flight', p.flight, 70)}</td>
                     ${sharedCells}
-                    <td><input type="number" value="${p.netCost}" oninput="updateHubPlacementField(${idx}, 'netCost', this.value)" style="width:90px;"></td>
+                    <td><input type="number" value="${p.netCost}" oninput="updateHubPlacementField(${idx}, 'netCost', this.value)" style="width:80px;"></td>
                     <td>
-                        <input type="number" value="${p.quantity}" ${p.manualQuantity ? '' : 'disabled title="Calculated from Rate and Net Cost — check Manual Qty to override"'} oninput="updateHubPlacementField(${idx}, 'quantity', this.value)" style="width:90px;">
-                        <label style="display:flex;align-items:center;gap:3px;font-size:0.7rem;color:var(--text-muted);white-space:nowrap;margin-top:2px;">
-                            <input type="checkbox" ${p.manualQuantity ? 'checked' : ''} onchange="updateHubPlacementField(${idx}, 'manualQuantity', this.checked)" style="width:auto;margin:0;"> Manual
-                        </label>
+                        <div style="display:flex;align-items:center;gap:4px;">
+                            <input type="number" value="${p.quantity}" ${p.manualQuantity ? '' : 'disabled title="Calculated from Rate and Net Cost — check Manual Qty to override"'} oninput="updateHubPlacementField(${idx}, 'quantity', this.value)" style="width:75px;">
+                            <input type="checkbox" ${p.manualQuantity ? 'checked' : ''} onchange="updateHubPlacementField(${idx}, 'manualQuantity', this.checked)" title="Manual override" style="width:auto;margin:0;">
+                        </div>
                     </td>
                     <td>
-                        <select onchange="updateHubPlacementField(${idx}, 'placementType', this.value)" style="min-width:150px;">
+                        <select onchange="updateHubPlacementField(${idx}, 'placementType', this.value)" style="min-width:130px;">
                             <option value="" ${!p.placementType ? 'selected' : ''}>— Select —</option>
                             ${HUB_PLACEMENT_TYPES.map(t => `<option value="${t}" ${p.placementType === t ? 'selected' : ''}>${escapeHtml(getPlacementTypeLabel(t))}</option>`).join('')}
                         </select>
