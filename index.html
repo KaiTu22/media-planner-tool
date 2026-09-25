@@ -15300,7 +15300,83 @@
         }
 
         function removeHubPlacementRow(idx) {
+            const removed = hubPlacements[idx];
             hubPlacements.splice(idx, 1);
+            // If removing this row drops its bundle down to exactly one
+            // surviving member, that survivor is no longer a bundle — clear
+            // its grouping metadata so it renders (and moves) as a plain
+            // standalone row instead of a one-line "group" with a stale
+            // sourceGroupId/sharedGroupId/name still attached.
+            if (removed.sourceGroupId) {
+                const siblings = hubPlacements.filter(p => p.sourceGroupId === removed.sourceGroupId);
+                if (siblings.length === 1) {
+                    delete siblings[0].sourceGroupId;
+                    delete siblings[0].sourceMenuItemName;
+                    delete siblings[0].sharedGroupId;
+                }
+            }
+            renderHubPlacementsTable();
+        }
+
+        // Moves an entire block (a standalone row, or a whole bundle's
+        // contiguous rows) up or down past its neighboring block — never
+        // splits a bundle apart, since getHubPlacementBlocks() always
+        // treats same-sourceGroupId rows as one unit to move together.
+        function moveHubPlacementBlock(rowIdx, direction) {
+            const blocks = getHubPlacementBlocks();
+            const blockIndexByRow = {};
+            blocks.forEach((b, bi) => { for (let r = b.start; r <= b.end; r++) blockIndexByRow[r] = bi; });
+            const blockIdx = blockIndexByRow[rowIdx];
+            const targetBlockIdx = blockIdx + direction;
+            if (targetBlockIdx < 0 || targetBlockIdx >= blocks.length) return;
+
+            const thisBlock = blocks[blockIdx];
+            const otherBlock = blocks[targetBlockIdx];
+            const firstBlock = direction > 0 ? thisBlock : otherBlock;
+            const secondBlock = direction > 0 ? otherBlock : thisBlock;
+
+            const before = hubPlacements.slice(0, firstBlock.start);
+            const firstItems = hubPlacements.slice(firstBlock.start, firstBlock.end + 1);
+            const secondItems = hubPlacements.slice(secondBlock.start, secondBlock.end + 1);
+            const after = hubPlacements.slice(secondBlock.end + 1);
+            hubPlacements = before.concat(secondItems, firstItems, after);
+            renderHubPlacementsTable();
+        }
+
+        // Grows an already-added single placement into a multi-line bundle
+        // right in the table. If the row isn't already part of a group, it
+        // gets a fresh sourceGroupId (but no sourceMenuItemName, so it
+        // renders as a plain grouped bundle with no "FROM MENU" header —
+        // that name is reserved for groups that actually came from the
+        // Placement Menu). A blank copy of the row (same
+        // costMethod/rate/placementType/isAddedValue, blank
+        // platform/description/size/flight/netCost/quantity) is inserted
+        // right after it, keeping the bundle's rows contiguous.
+        function addLineToPlacement(idx) {
+            const p = hubPlacements[idx];
+            if (!p.sourceGroupId) {
+                p.sourceGroupId = 'adhoc-' + generateId();
+            }
+            const groupId = p.sourceGroupId;
+            let insertAt = idx + 1;
+            while (insertAt < hubPlacements.length && hubPlacements[insertAt].sourceGroupId === groupId) insertAt++;
+
+            const newLine = {
+                platform: '',
+                description: '',
+                size: '',
+                flight: '',
+                costMethod: p.costMethod,
+                rate: p.sharedGroupId ? p.rate : (p.costMethod === 'CPM' ? p.rate : ''),
+                netCost: '',
+                quantity: '',
+                manualQuantity: false,
+                placementType: p.placementType,
+                isAddedValue: p.isAddedValue,
+                sourceGroupId: groupId,
+                sharedGroupId: p.sharedGroupId,
+            };
+            hubPlacements.splice(insertAt, 0, newLine);
             renderHubPlacementsTable();
         }
 
@@ -15381,6 +15457,28 @@
             });
         }
 
+        // A "block" is one or more consecutive placements that move
+        // together when reordering — a bundle's rows (grouped by
+        // sourceGroupId, whether it came from the menu or was grown by
+        // hand with addLineToPlacement) always move as one unit, so
+        // reordering can never split a bundle apart and break its shared
+        // rate cell or source-name header. A row with no sourceGroupId is
+        // its own single-row block.
+        function getHubPlacementBlocks() {
+            const blocks = [];
+            let i = 0;
+            while (i < hubPlacements.length) {
+                const groupId = hubPlacements[i].sourceGroupId;
+                let end = i;
+                if (groupId) {
+                    while (end + 1 < hubPlacements.length && hubPlacements[end + 1].sourceGroupId === groupId) end++;
+                }
+                blocks.push({ start: i, end });
+                i = end + 1;
+            }
+            return blocks;
+        }
+
         function renderHubPlacementsTable() {
             const tbody = document.getElementById('hubPlacementsBody');
             if (hubPlacements.length === 0) {
@@ -15397,6 +15495,9 @@
             });
             const seenGroups = new Set();
             const seenSourceGroups = new Set();
+            const blocks = getHubPlacementBlocks();
+            const blockIndexByRow = {};
+            blocks.forEach((b, bi) => { for (let r = b.start; r <= b.end; r++) blockIndexByRow[r] = bi; });
 
             tbody.innerHTML = hubPlacements.map((p, idx) => {
                 const groupId = p.sharedGroupId;
@@ -15405,18 +15506,24 @@
                 const isGroupMember = !!groupId;
                 const rowSpan = groupId ? groupRunLength[groupId] : 1;
 
+                const blockIdx = blockIndexByRow[idx];
+                const isBlockFirst = blocks[blockIdx].start === idx;
+                const canMoveUp = blockIdx > 0;
+                const canMoveDown = blockIdx < blocks.length - 1;
+
                 // A section header naming the source menu placement, shown
-                // once above its first row — same idea whether it expanded
-                // into one line or a whole bundle, so it's easy to tell
-                // which rows came from the menu (and which were typed by
-                // hand) when verifying or editing later.
+                // once above its first row — only for a group that actually
+                // came from the menu (sourceMenuItemName set); a bundle
+                // grown by hand via addLineToPlacement has a sourceGroupId
+                // for move/grouping purposes but no name, so it correctly
+                // gets no header.
                 let sourceHeaderRow = '';
-                if (p.sourceGroupId && !seenSourceGroups.has(p.sourceGroupId)) {
+                if (p.sourceGroupId && p.sourceMenuItemName && !seenSourceGroups.has(p.sourceGroupId)) {
                     seenSourceGroups.add(p.sourceGroupId);
                     sourceHeaderRow = `
                         <tr>
                             <td colspan="11" style="background:var(--primary);color:#fff;font-weight:600;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;padding:4px 8px;">
-                                ▸ ${escapeHtml(p.sourceMenuItemName || 'From Menu')}
+                                ▸ ${escapeHtml(p.sourceMenuItemName)}
                             </td>
                         </tr>
                     `;
@@ -15484,7 +15591,16 @@
                         </select>
                     </td>
                     <td style="text-align:center;"><input type="checkbox" ${p.isAddedValue ? 'checked' : ''} onchange="updateHubPlacementField(${idx}, 'isAddedValue', this.checked)"></td>
-                    <td><span class="delete-icon" onclick="removeHubPlacementRow(${idx})" title="Remove placement">✕</span></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                            ${isBlockFirst ? `
+                                <span class="delete-icon" onclick="moveHubPlacementBlock(${idx}, -1)" title="Move up" style="cursor:${canMoveUp ? 'pointer' : 'default'};opacity:${canMoveUp ? '1' : '0.25'};">▲</span>
+                                <span class="delete-icon" onclick="moveHubPlacementBlock(${idx}, 1)" title="Move down" style="cursor:${canMoveDown ? 'pointer' : 'default'};opacity:${canMoveDown ? '1' : '0.25'};">▼</span>
+                            ` : `<span style="display:inline-block;width:26px;"></span>`}
+                            <span class="delete-icon" onclick="addLineToPlacement(${idx})" title="Add another line to this bundle">+</span>
+                            <span class="delete-icon" onclick="removeHubPlacementRow(${idx})" title="Remove placement">✕</span>
+                        </div>
+                    </td>
                 </tr>
                 `;
             }).join('');
