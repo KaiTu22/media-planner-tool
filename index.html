@@ -15295,24 +15295,22 @@
             sponsorshipLineItems = lineItems;
             sponsorshipSectionHeaders = [];
             editingPackageIndex = -1;
+            hasUnsavedChanges = true;
 
             closeAttachFromHubPicker();
 
-            // Same finalize steps as savePackage()'s "new package" path,
-            // minus the Final-Summary-screen notes/URL DOM reads — this
-            // attaches directly from the version summary, not from that
-            // wizard screen, so those fields just stay blank (already set
-            // above) rather than reading from inputs that aren't on screen.
-            currentVersion.packages.push({ ...currentPackage });
-            checkAndRevertVerification(currentVersion);
-            saveProjects();
-            currentPackage = {};
-            platformAllocations = [];
-            sponsorshipLineItems = [];
-            sponsorshipSectionHeaders = [];
-            hasUnsavedChanges = false;
-            displayVersionSummary();
-            showScreen('screen-6');
+            // Lands in the same "Assign Placement Types & Costs" editor used
+            // by manual entry, spreadsheet import, and re-editing an
+            // already-saved package (see editPackage()) — letting the user
+            // review and adjust every field before anything is committed.
+            // Nothing is pushed to currentVersion.packages here: proceeding
+            // through Next → Final Summary → Save Package runs the exact
+            // same savePackage() every other detailed sponsorship package
+            // goes through, which does the actual push since
+            // editingPackageIndex is -1 (a "new" package).
+            const packageTypeRadio = document.querySelector('input[name="packageType"][value="sponsorship"]');
+            if (packageTypeRadio) packageTypeRadio.checked = true;
+            showLineItemTypeAssignment();
         }
 
         function removeHubPlacementRow(idx) {
@@ -17967,8 +17965,13 @@ Media %: ${document.getElementById('bl-c-output-media-pct').textContent}`;
         }
         
         function sponsorshipGoBack() {
-            // If editing, ask for confirmation and go back to version summary
-            if (editingPackageIndex >= 0) {
+            // If editing an existing package, OR reviewing a package that
+            // was just attached from the Sponsorship Hub and hasn't been
+            // saved yet (identifiable via sourceSponsorshipId, which only
+            // confirmAttachHubPackage ever sets), "Back" discards and
+            // returns to the version summary — neither path has a
+            // column-mapping screen to go back to.
+            if (editingPackageIndex >= 0 || currentPackage.sourceSponsorshipId) {
                 showConfirm(
                     'Discard changes and return to package summary?',
                     (confirmed) => {
