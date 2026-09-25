@@ -15065,6 +15065,7 @@
                 platform: '', description: '', size: '', flight: '',
                 costMethod: 'CPM', rate: '', quantity: '', netCost: '', isAddedValue: false,
                 placementType: '', manualQuantity: false, sharedGroupId: null,
+                sourceGroupId: null, sourceMenuItemName: null,
             });
             renderHubPlacementsTable();
         }
@@ -15111,8 +15112,16 @@
             // sharedGroupId ties these rows together in the placements
             // table so the shared Cost Method/Rate renders once (a real
             // merged cell), not repeated identically on every row.
+            //
+            // sourceGroupId/sourceMenuItemName (confirmed 2026-09-25) are a
+            // separate, broader grouping — every line from this add (shared
+            // or per-line, single or bundled) gets tagged so the table can
+            // show a section header naming which menu placement it came
+            // from, for easier verification/editing later. A hand-added
+            // custom line never gets these, so it never shows a header.
             const isShared = item.rateMode === 'shared';
             const sharedGroupId = isShared ? ('shared-' + generateId()) : null;
+            const sourceGroupId = 'source-' + generateId();
             item.lines.forEach(line => {
                 const costMethod = isShared ? (item.sharedCostMethod || '') : (line.costMethod || '');
                 const rate = isShared ? (item.sharedRate || '') : (line.defaultRate || '');
@@ -15121,6 +15130,7 @@
                     flight: '', costMethod, rate,
                     quantity: '', netCost: '', isAddedValue: costMethod === 'AV',
                     placementType: category.placementType, manualQuantity: false, sharedGroupId,
+                    sourceGroupId, sourceMenuItemName: item.name || '',
                 });
             });
             renderHubPlacementsTable();
@@ -15352,6 +15362,7 @@
                 if (p.sharedGroupId) groupRunLength[p.sharedGroupId] = (groupRunLength[p.sharedGroupId] || 0) + 1;
             });
             const seenGroups = new Set();
+            const seenSourceGroups = new Set();
 
             tbody.innerHTML = hubPlacements.map((p, idx) => {
                 const groupId = p.sharedGroupId;
@@ -15359,6 +15370,23 @@
                 if (groupId) seenGroups.add(groupId);
                 const isGroupMember = !!groupId;
                 const rowSpan = groupId ? groupRunLength[groupId] : 1;
+
+                // A section header naming the source menu placement, shown
+                // once above its first row — same idea whether it expanded
+                // into one line or a whole bundle, so it's easy to tell
+                // which rows came from the menu (and which were typed by
+                // hand) when verifying or editing later.
+                let sourceHeaderRow = '';
+                if (p.sourceGroupId && !seenSourceGroups.has(p.sourceGroupId)) {
+                    seenSourceGroups.add(p.sourceGroupId);
+                    sourceHeaderRow = `
+                        <tr>
+                            <td colspan="11" style="background:var(--primary);color:#fff;font-weight:600;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;padding:4px 8px;">
+                                ▸ ${escapeHtml(p.sourceMenuItemName || 'From Menu')}
+                            </td>
+                        </tr>
+                    `;
+                }
 
                 const costMethodSelect = (onChange) => `
                     <select onchange="${onChange}" style="min-width:150px;">
@@ -15401,6 +15429,7 @@
                     `<textarea rows="1" title="${escapeHtml(value)}" oninput="this.title=this.value;updateHubPlacementField(${idx}, '${field}', this.value)" style="width:${width}px;">${escapeHtml(value)}</textarea>`;
 
                 return `
+                ${sourceHeaderRow}
                 <tr>
                     <td>${growBox('platform', p.platform, 95)}</td>
                     <td>${growBox('description', p.description, 150)}</td>
