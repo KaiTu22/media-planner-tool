@@ -15311,6 +15311,37 @@
         // derived (quantity = netCost / rate * 1000 for CPM) unless
         // manualQuantity is checked, which frees Quantity for a real
         // guaranteed-commitment number that doesn't cleanly divide out.
+        // Renders a stored numeric value with thousands separators inside
+        // an editable input — distinct from formatNumber (which forces
+        // "0.00" on empty), since an empty/untouched Rate or Net Cost field
+        // should render blank, not "0.00".
+        function formatMoneyForInput(value) {
+            const num = parseFloat(value);
+            if (value === '' || value === null || value === undefined || isNaN(num)) return '';
+            return num.toLocaleString('en-US');
+        }
+        function formatIntForInput(value) {
+            const num = parseFloat(value);
+            if (value === '' || value === null || value === undefined || isNaN(num)) return '';
+            return Math.round(num).toLocaleString('en-US');
+        }
+
+        // Surgically updates just one row's Quantity input's value (and,
+        // when it's not in manual mode, its disabled/title state) — never
+        // renderHubPlacementsTable() here. A full re-render replaces every
+        // input's DOM node via innerHTML, which would steal focus from
+        // whatever Rate/Net Cost field the user is actively typing into
+        // (confirmed 2026-09-25: this was the actual cause of "can only
+        // type one digit at a time").
+        function updateQuantityInputDom(idx) {
+            const p = hubPlacements[idx];
+            const qtyInput = document.getElementById('hub-qty-' + idx);
+            if (!qtyInput) return;
+            qtyInput.disabled = !p.manualQuantity;
+            qtyInput.title = p.manualQuantity ? '' : 'Calculated from Rate and Net Cost — check Manual Qty to override';
+            qtyInput.value = formatIntForInput(p.quantity);
+        }
+
         function recalcHubPlacementQuantity(p) {
             if (p.manualQuantity) return;
             const rate = parseFloat(p.rate);
@@ -15324,27 +15355,30 @@
             hubPlacements[idx][field] = rawValue;
             const p = hubPlacements[idx];
             if (field === 'manualQuantity') {
-                renderHubPlacementsTable();
+                updateQuantityInputDom(idx);
                 return;
             }
             if (field === 'costMethod' || field === 'rate' || field === 'netCost') {
                 recalcHubPlacementQuantity(p);
-                renderHubPlacementsTable();
+                updateQuantityInputDom(idx);
             }
         }
 
         // A shared-CPM bundle's Cost Method/Rate are edited once for the
         // whole group (see the rowspan cell in renderHubPlacementsTable),
         // not per row — every member's own Net Cost still drives its own
-        // Quantity independently against that one shared rate.
+        // Quantity independently against that one shared rate. Same
+        // surgical-update reasoning as updateHubPlacementField — this
+        // fires on every keystroke in the shared Rate field, so a full
+        // re-render here would steal focus from it too.
         function updateSharedGroupField(groupId, field, value) {
-            hubPlacements.forEach(p => {
+            hubPlacements.forEach((p, idx) => {
                 if (p.sharedGroupId === groupId) {
                     p[field] = value;
                     recalcHubPlacementQuantity(p);
+                    updateQuantityInputDom(idx);
                 }
             });
-            renderHubPlacementsTable();
         }
 
         function renderHubPlacementsTable() {
@@ -15405,7 +15439,7 @@
                                 <div style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">Shared across ${rowSpan} lines</div>
                             </td>
                             <td rowspan="${rowSpan}" style="background:var(--background-subtle);text-align:center;">
-                                <input type="number" value="${p.rate}" oninput="updateSharedGroupField('${groupId}', 'rate', this.value)" style="width:70px;">
+                                <input type="text" inputmode="decimal" value="${formatMoneyForInput(p.rate)}" oninput="formatCurrencyLive(event); updateSharedGroupField('${groupId}', 'rate', parseCurrency(this.value))" style="width:70px;">
                             </td>
                         `;
                     } else {
@@ -15414,7 +15448,7 @@
                 } else {
                     sharedCells = `
                         <td>${costMethodSelect(`updateHubPlacementField(${idx}, 'costMethod', this.value)`)}</td>
-                        <td><input type="number" value="${p.rate}" oninput="updateHubPlacementField(${idx}, 'rate', this.value)" style="width:70px;"></td>
+                        <td><input type="text" inputmode="decimal" value="${formatMoneyForInput(p.rate)}" oninput="formatCurrencyLive(event); updateHubPlacementField(${idx}, 'rate', parseCurrency(this.value))" style="width:70px;"></td>
                     `;
                 }
 
@@ -15436,10 +15470,10 @@
                     <td>${growBox('size', p.size, 70)}</td>
                     <td>${growBox('flight', p.flight, 70)}</td>
                     ${sharedCells}
-                    <td><input type="number" value="${p.netCost}" oninput="updateHubPlacementField(${idx}, 'netCost', this.value)" style="width:80px;"></td>
+                    <td><input type="text" inputmode="decimal" value="${formatMoneyForInput(p.netCost)}" oninput="formatCurrencyLive(event); updateHubPlacementField(${idx}, 'netCost', parseCurrency(this.value))" style="width:80px;"></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:4px;">
-                            <input type="number" value="${p.quantity}" ${p.manualQuantity ? '' : 'disabled title="Calculated from Rate and Net Cost — check Manual Qty to override"'} oninput="updateHubPlacementField(${idx}, 'quantity', this.value)" style="width:75px;">
+                            <input type="text" inputmode="numeric" id="hub-qty-${idx}" value="${formatIntForInput(p.quantity)}" ${p.manualQuantity ? '' : 'disabled title="Calculated from Rate and Net Cost — check Manual Qty to override"'} oninput="formatNumberLive(event); updateHubPlacementField(${idx}, 'quantity', parseNumber(this.value))" style="width:75px;">
                             <input type="checkbox" ${p.manualQuantity ? 'checked' : ''} onchange="updateHubPlacementField(${idx}, 'manualQuantity', this.checked)" title="Manual override" style="width:auto;margin:0;">
                         </div>
                     </td>
