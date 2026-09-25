@@ -3718,6 +3718,22 @@
         </div>
     </div>
 
+    <!-- Merge Into Existing Bundle Dialog -->
+    <div id="mergeBundleDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 0.85rem; border-radius: 12px; max-width: 480px; width: 90%; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 style="margin-bottom: 0.6rem; color: var(--primary); font-family: 'PeakSans', sans-serif; font-weight: 600;">Add to Existing Bundle</h3>
+            <p style="margin-bottom:0.6rem;color:var(--text-muted);font-size:0.85rem;">Merging attaches this placement to the bundle you choose below, so from now on they always move together as one unit.</p>
+            <div id="mergeBundleOptionsList" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;margin-bottom:0.6rem;"></div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;margin-bottom:0.75rem;">
+                <input type="checkbox" id="mergeBundleSharedCpm" style="width:auto;margin:0;"> Also share Cost Method &amp; Rate (bundled CPM) with that bundle
+            </label>
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
+                <button class="btn-secondary" onclick="closeMergeBundleDialog()">Cancel</button>
+                <button class="btn-primary" onclick="confirmMergeBundle()">Merge</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom Alert Dialog -->
     <div id="alertDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
         <div style="background: white; padding: 0.65rem; border-radius: 12px; max-width: 500px; margin: 0.6rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
@@ -15380,6 +15396,95 @@
             renderHubPlacementsTable();
         }
 
+        // Label shown for a block in the "Add to Existing Bundle" picker —
+        // prefers the menu name it was added under, falling back to the
+        // block's first row's own platform/description so ad-hoc bundles
+        // and single standalone rows are still identifiable.
+        function describeHubPlacementBlock(block) {
+            const first = hubPlacements[block.start];
+            if (first.sourceMenuItemName) return first.sourceMenuItemName;
+            const label = [first.platform, first.description].filter(Boolean).join(' — ');
+            return label || 'Untitled placement';
+        }
+
+        let mergeBundleSourceIdx = null;
+
+        // Opens the "Add to Existing Bundle" picker for the block containing
+        // idx — merging attaches that whole block (a single row, or an
+        // already-multi-line bundle) to another existing block so they move
+        // together going forward, optionally also sharing Cost Method/Rate.
+        function openMergeBundleDialog(idx) {
+            const blocks = getHubPlacementBlocks();
+            const sourceBlockIdx = blocks.findIndex(b => idx >= b.start && idx <= b.end);
+            const candidates = blocks.filter((b, bi) => bi !== sourceBlockIdx);
+            if (candidates.length === 0) {
+                customAlert('No other placements to merge with yet.');
+                return;
+            }
+            mergeBundleSourceIdx = blocks[sourceBlockIdx].start;
+            const list = document.getElementById('mergeBundleOptionsList');
+            list.innerHTML = candidates.map((b, i) => `
+                <label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;cursor:pointer;">
+                    <input type="radio" name="mergeBundleTarget" value="${b.start}" ${i === 0 ? 'checked' : ''} style="width:auto;margin:0;">
+                    <span>${escapeHtml(describeHubPlacementBlock(b))}${b.end > b.start ? ` <span style="color:var(--text-muted);font-size:0.78rem;">(${b.end - b.start + 1} lines)</span>` : ''}</span>
+                </label>
+            `).join('');
+            document.getElementById('mergeBundleSharedCpm').checked = false;
+            document.getElementById('mergeBundleDialog').style.display = 'flex';
+        }
+
+        function closeMergeBundleDialog() {
+            document.getElementById('mergeBundleDialog').style.display = 'none';
+            mergeBundleSourceIdx = null;
+        }
+
+        function confirmMergeBundle() {
+            const selected = document.querySelector('input[name="mergeBundleTarget"]:checked');
+            if (!selected || mergeBundleSourceIdx === null) { closeMergeBundleDialog(); return; }
+            const targetStart = parseInt(selected.value, 10);
+            const shareCpm = document.getElementById('mergeBundleSharedCpm').checked;
+
+            const blocks = getHubPlacementBlocks();
+            const sourceBlock = blocks.find(b => mergeBundleSourceIdx >= b.start && mergeBundleSourceIdx <= b.end);
+            const targetBlock = blocks.find(b => b.start === targetStart);
+            if (!sourceBlock || !targetBlock || sourceBlock === targetBlock) { closeMergeBundleDialog(); return; }
+
+            const movedRows = hubPlacements.slice(sourceBlock.start, sourceBlock.end + 1);
+            const targetRows = hubPlacements.slice(targetBlock.start, targetBlock.end + 1);
+
+            // Remove the moved block first, then relocate the target's new
+            // position by object reference, not index — removing rows
+            // before the target shifts its index, and splice keeps the
+            // same object references, so indexOf-by-reference is the
+            // reliable way to find where the target landed afterward.
+            hubPlacements.splice(sourceBlock.start, movedRows.length);
+            const newTargetEndIdx = hubPlacements.indexOf(targetRows[targetRows.length - 1]);
+
+            const mergedGroupId = targetRows[0].sourceGroupId || ('adhoc-' + generateId());
+            targetRows.forEach(r => { r.sourceGroupId = mergedGroupId; });
+            movedRows.forEach(r => {
+                r.sourceGroupId = mergedGroupId;
+                delete r.sourceMenuItemName;
+            });
+
+            if (shareCpm) {
+                const sharedId = targetRows[0].sharedGroupId || ('shared-' + generateId());
+                const sharedCostMethod = targetRows[0].costMethod;
+                const sharedRate = targetRows[0].rate;
+                targetRows.concat(movedRows).forEach(r => {
+                    r.sharedGroupId = sharedId;
+                    r.costMethod = sharedCostMethod;
+                    r.rate = sharedRate;
+                    recalcHubPlacementQuantity(r);
+                });
+            }
+
+            hubPlacements.splice(newTargetEndIdx + 1, 0, ...movedRows);
+
+            closeMergeBundleDialog();
+            renderHubPlacementsTable();
+        }
+
         // Default direction (confirmed 2026-09-24): Rate and Net Cost are
         // the primary inputs — a planner typically already knows the target
         // investment and the market rate, and wants the app to say how many
@@ -15596,7 +15701,8 @@
                             ${isBlockFirst ? `
                                 <span class="delete-icon" onclick="moveHubPlacementBlock(${idx}, -1)" title="Move up" style="cursor:${canMoveUp ? 'pointer' : 'default'};opacity:${canMoveUp ? '1' : '0.25'};">▲</span>
                                 <span class="delete-icon" onclick="moveHubPlacementBlock(${idx}, 1)" title="Move down" style="cursor:${canMoveDown ? 'pointer' : 'default'};opacity:${canMoveDown ? '1' : '0.25'};">▼</span>
-                            ` : `<span style="display:inline-block;width:26px;"></span>`}
+                                <span class="delete-icon" onclick="openMergeBundleDialog(${idx})" title="Add to an existing bundle">⇄</span>
+                            ` : `<span style="display:inline-block;width:39px;"></span>`}
                             <span class="delete-icon" onclick="addLineToPlacement(${idx})" title="Add another line to this bundle">+</span>
                             <span class="delete-icon" onclick="removeHubPlacementRow(${idx})" title="Remove placement">✕</span>
                         </div>
